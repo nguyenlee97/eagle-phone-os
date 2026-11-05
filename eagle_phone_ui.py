@@ -385,7 +385,7 @@ EAGLE_PHONE_HTML = r"""<!DOCTYPE html>
     background: rgba(8, 13, 26, 0.94);
     border-top: 1px solid var(--border);
     display: grid;
-    grid-template-columns: repeat(11, 1fr);
+    grid-template-columns: repeat(15, 1fr);
     padding: 4px 2px 6px 2px;
     gap: 2px;
     flex-shrink: 0;
@@ -411,7 +411,10 @@ EAGLE_PHONE_HTML = r"""<!DOCTYPE html>
 
 <div class="top-Controls">
   <button class="mode-btn" onclick="switchApp(0)" style="border-color:#38bdf8;color:#bae6fd;" data-en="🏠 Home Screen (Bksp)" data-vi="🏠 Màn Hình Chính (Bksp)">🏠 Home Screen (Bksp)</button>
-  <button class="mode-btn" onclick="switchApp(10)" style="border-color:#10b981;color:#a7f3d0;" data-en="🗺️ GG Map & GPS Routing (Key 0)" data-vi="🗺️ Mở GG Map & Chỉ Đường GPS (Phím 0)">🗺️ GG Map & GPS Routing (Key 0)</button>
+  <button class="mode-btn" onclick="switchApp(10)" style="border-color:#10b981;color:#a7f3d0;" data-en="🗺️ GG Map & GPS" data-vi="🗺️ GG Map & Chỉ Đường GPS">🗺️ GG Map & GPS</button>
+  <button class="mode-btn" onclick="switchApp(12)" style="border-color:#f59e0b;color:#fde68a;" data-en="🚕 EagleRide (Uber/Xanh/Grab/Be)" data-vi="🚕 Đặt Xe EagleRide (Uber/Xanh/Grab/Be)">🚕 EagleRide (Uber/Xanh/Grab/Be)</button>
+  <button class="mode-btn" onclick="switchApp(13)" style="border-color:#f43f5e;color:#fecdd3;" data-en="💖 WaifuLink (App 13)" data-vi="💖 WaifuLink (App 13)">💖 WaifuLink (App 13)</button>
+  <button class="mode-btn" onclick="switchApp(14)" style="border-color:#38bdf8;color:#bae6fd;" data-en="📱 Contacts & Mondstadt DM (App 14)" data-vi="📱 Danh Bạ Mondstadt & Waifu (App 14)">📱 Contacts & Mondstadt DM (App 14)</button>
   <button class="mode-btn" onclick="toggleFrameMode()" data-en="📱 Frame: Phone / Tablet" data-vi="📱 Đổi Khung: Điện Thoại / Tablet">📱 Frame: Phone / Tablet</button>
   <button class="mode-btn" style="border-color:#ef4444;color:#fecaca;" onclick="act('report_map_bug', {})" data-en="🐛 Log Map Bug (F11)" data-vi="🐛 Báo Bug Tọa Độ (F11)">🐛 Log Map Bug (F11)</button>
   <button class="mode-btn" style="border-color:#10b981;color:#a7f3d0;" onclick="act('unstuck_player', {})" data-en="🛟 Quick Unstuck (F12)" data-vi="🛟 Cứu Hộ Nhanh (F12)">🛟 Quick Unstuck (F12)</button>
@@ -1080,9 +1083,268 @@ EAGLE_PHONE_HTML = r"""<!DOCTYPE html>
         <div class="btn-row"><button class="btn" onclick="act('paimon_call',{mode:4})">Today's EagleTimes</button></div>
       </div><div class="card"><div class="card-title">Paimon's last reply</div><div id="paimonReply"></div></div>
     </div>
+
+    <!-- ==================== APP 12: EAGLERIDE (UBER / XANH SM / GRAB / BE + RADIO + FAST-FORWARD) ==================== -->
+    <div class="app-page" id="page-12">
+      <div class="card" style="border-color:#06b6d4;">
+        <img src="/assets/ep_bn_ride.png" class="visual-banner" alt="EagleRide Banner">
+        <div class="card-title">
+          <span data-en="🚕 EagleRide — Book Car / Bike (Uber • Xanh SM • Grab • Be)" data-vi="🚕 EagleRide — Đặt Xe Ô Tô / Xe Máy (Uber • Xanh SM • Grab • Be)">🚕 EagleRide — Book Car / Bike (Uber • Xanh SM • Grab • Be)</span>
+          <span id="rideUnlockedBadge" style="color:#6ee7b7;">18/715 Đã Mở Khóa</span>
+        </div>
+        <div id="rideActiveTripBox" style="margin-bottom:8px;"></div>
+        <div style="font-size:11px;font-weight:800;color:#fde68a;margin-bottom:4px;" data-en="🚘 1. Select Ride Brand & Vehicle Type (Keys 1..5 or U in-game):" data-vi="🚘 1. Chọn Hãng Xe Ô Tô / Xe Máy (Phím 1..5 hoặc U trong game):">🚘 1. Select Ride Brand & Vehicle Type (Keys 1..5 or U in-game):</div>
+        <div id="rideServiceGrid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:8px;"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;background:#0a101f;border:1px solid #263554;border-radius:9px;padding:6px 9px;margin-bottom:8px;">
+          <div style="font-size:11px;color:#93c5fd;">📻 <b data-en="Passenger Radio (Key O):" data-vi="Đài Radio Trên Xe (Phím O):">Passenger Radio (Key O):</b> <span id="rideRadioBadge" style="color:#fde68a;font-weight:800;">Flash FM</span></div>
+          <div style="display:flex;gap:4px;">
+            <button class="pill" onclick="act('ride_cycle_radio',{delta:-1})">◀ Radio</button>
+            <button class="pill active" onclick="act('ride_cycle_radio',{delta:1})">Radio ▶</button>
+          </div>
+        </div>
+        <div class="pill-row" id="rideCatPills" style="margin-bottom:8px;"></div>
+        <div style="display:flex;gap:6px;">
+          <input type="text" id="rideSearchInput" oninput="act('ride_set_search',{query:this.value});renderAll();" placeholder="🔍 Search destination, Mondstadt, WIBU-01, airport, casino, bridge..." style="flex:1;">
+          <button class="btn" style="flex:0 0 80px;" onclick="document.getElementById('rideSearchInput').value='';act('ride_set_search',{query:''});renderAll();" data-en="Clear" data-vi="Xóa Lọc">Clear</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span id="rideListHeaderTitle">📍 Điểm Đến Đặt Xe (Chỉ Đặt Được Điểm Đã Tự Lái Tới)</span>
+          <span id="rideStatsBadge" style="color:#93c5fd;font-size:10px;">0 chuyến • $0</span>
+        </div>
+        <div id="ridePoiListBox" style="max-height:440px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;"></div>
+      </div>
+    </div>
+
+    <!-- ==================== APP 13: WAIFULINK v4.0 (TRAVELER AETHER VN + OPEN-WORLD + AI DATING SIM) ==================== -->
+    <div class="app-page" id="page-13">
+      <div class="card" style="border-color:#f472b6;padding:8px 10px;">
+        <div class="card-title" style="margin-bottom:6px;flex-wrap:wrap;gap:4px;">
+          <span>💖 WaifuLink v4.0 — VN + Open-World + AI Dating Sim</span>
+          <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
+            <span id="wlAiModelBadge" style="font-size:9.5px;background:#1e1b4b;color:#c4b5fd;border:1px solid #6366f1;padding:2px 7px;border-radius:999px;font-weight:800;">🤖 AI: gpt-6-luna</span>
+            <span id="wlSafetyBadge" style="font-size:9.5px;background:#065f46;color:#6ee7b7;padding:2px 7px;border-radius:999px;font-weight:800;">🛡️ Hot Coffee: LOCKED</span>
+          </div>
+        </div>
+        <!-- 6 Girlfriends Horizontal Selector -->
+        <div id="wlRosterStrip" style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:8px;"></div>
+        <!-- Selected Girlfriend Header Card (Includes 3-Pillar Progression & Stage-Gate Lock) -->
+        <div id="wlSelectedHeader" style="background:linear-gradient(135deg, rgba(15,23,42,0.96), rgba(49,16,47,0.88));border:1px solid #f472b6;border-radius:11px;padding:8px 10px;margin-bottom:8px;"></div>
+        <!-- 5-Subtab Navigation -->
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;">
+          <button class="pill active" id="wlTabBtn-chat" onclick="setWaifuSubtab('chat')">💬 Chat</button>
+          <button class="pill" id="wlTabBtn-scenarios" onclick="setWaifuSubtab('scenarios')">🎭 VN Scenarios</button>
+          <button class="pill" id="wlTabBtn-dates" onclick="setWaifuSubtab('dates')">🚗 Outings &amp; Gifts</button>
+          <button class="pill" id="wlTabBtn-profile" onclick="setWaifuSubtab('profile')">🧠 3-Tier Memory</button>
+          <button class="pill" id="wlTabBtn-gallery" onclick="setWaifuSubtab('gallery')">📸 15 CGs &amp; Lore</button>
+        </div>
+      </div>
+
+      <!-- SUBTAB 1: MESSENGER CHAT, LIVE AI SUGGESTED REPLIES & TIME-APART MILESTONE PHOTO DROPS -->
+      <div id="wlSub-chat">
+        <div class="card" style="padding:8px 10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+            <span style="font-size:10px;color:#93c5fd;font-weight:800;">📱 EaglePhone Small-Talk Pillar (+5..6 ♥/turn • Cap 45 ♥/Stage)</span>
+            <button class="btn btn-gold" style="padding:3px 9px;font-size:10px;" onclick="act('dating_time_apart_drop',{})" title="Simulate time apart after reaching a milestone so she proactively texts you a new Milestone Photo + 3 reaction options!">
+              ⏱️ Time Apart: Receive Milestone Photo
+            </button>
+          </div>
+          <div id="wlChatMessagesBox" style="height:285px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-right:4px;margin-bottom:8px;"></div>
+
+          <!-- Live AI Recommended Dialogue Options (Updated every turn by gpt-6-luna or Milestone Photo Drop) -->
+          <div style="font-size:10.5px;font-weight:800;color:#fde68a;margin-bottom:4px;">⚡ Live Recommended Dialogue Options (1-Click Reply):</div>
+          <div id="wlSuggestedRepliesBox" style="display:flex;flex-direction:column;gap:4px;margin-bottom:7px;"></div>
+
+          <!-- Pre-Generated Stage Chat Starters / Topics -->
+          <div style="font-size:10px;font-weight:800;color:#f9a8d4;margin-bottom:4px;">📋 Pre-Generated Stage Chat Topics:</div>
+          <div id="wlChoicesBox" style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px;"></div>
+
+          <div style="display:flex;gap:5px;">
+            <input type="text" id="wlChatInput" onkeydown="if(event.key==='Enter')sendWaifuChat()" placeholder="Type freely as Traveler Aether (or click any recommended reply above)..." style="flex:1;">
+            <button class="btn btn-purple" style="flex:0 0 auto;padding:6px 10px;" onclick="act('dating_time_apart_drop',{})" title="Trigger next Milestone CG Photo Drop">📸 CG</button>
+            <button class="btn btn-blue" style="flex:0 0 auto;padding:6px 14px;" onclick="sendWaifuChat()">Send ➤</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBTAB 2: VISUAL NOVEL SCENARIOS (20 CORE + 10 EXTRA GENSHIN CAMEOS + 4 CGS EACH + ANTI-STUCK GUARDRAIL) -->
+      <div id="wlSub-scenarios" style="display:none;">
+        <div class="card">
+          <div class="card-title" style="flex-wrap:wrap;gap:6px;">
+            <span>🎭 30 Visual Novel Scenarios (20 Core + 10 Extra Genshin Cameos • 4 CGs/Scenario • +35 ♥)</span>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              <button class="btn btn-gold" style="padding:4px 9px;font-size:10px;" onclick="act('dating_open_house_menu',{})">
+                🏠 Visit Her House (Event Menu)
+              </button>
+              <button class="btn btn-purple" style="padding:4px 10px;font-size:10.5px;" onclick="act('dating_encore_vn',{})">
+                ✨ + Generate AI Encore Scenario
+              </button>
+            </div>
+          </div>
+          <div style="font-size:10.5px;color:#cbd5e1;margin-bottom:8px;line-height:1.42;">
+            Includes <b>20 Core Romance Scenarios</b> + <b>10 Extra Genshin Cameo &amp; Daily-Life Scenarios</b> (featuring <b>Xiangling, Xingqiu, Chongyun, Zhongli, Yun Jin, Keqing, Ganyu, Venti, Yoimiya &amp; Furina</b> with stage-responsive reactions: friendly hangouts → teasing sparks → caught red-handed on a date → soulmate blessings!). Every scenario has <b>4 unique 16:9 CGs</b>, pre-generated options + custom free-text input, and an <b>AI Off-Topic Re-Ask &amp; Anti-Stuck Guardrail</b>.
+          </div>
+          <div id="wlScenariosListBox" style="display:flex;flex-direction:column;gap:8px;max-height:480px;overflow-y:auto;"></div>
+        </div>
+      </div>
+
+      <!-- SUBTAB 3: FREE-ROAM CHAUFFEUR OUTINGS & GIFT SHOP -->
+      <div id="wlSub-dates" style="display:none;">
+        <div class="card">
+          <div class="card-title">
+            <span>🚗 Free-Roam Chauffeur Outing (Cap 75 ♥ / Stage)</span>
+            <span style="font-size:10px;color:#6ee7b7;">S-Rank Smooth +25 ♥ • Safe +20 ♥</span>
+          </div>
+          <div style="font-size:10.5px;color:#cbd5e1;margin-bottom:7px;line-height:1.4;">
+            Pin a Date Spot on your GTA SA radar and drive her there cleanly without crashing or getting a Wanted Star!
+          </div>
+          <div id="wlActiveFreeroamBanner" style="margin-bottom:8px;"></div>
+          <div id="wlDateSpotsBox" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">
+            <span>🎁 Send Gift Delivery (Uses GTA SA Cash)</span>
+            <span style="font-size:10px;color:#fde68a;">★ Favored = 1.4x Bonus</span>
+          </div>
+          <div id="wlGiftsBox" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+      </div>
+
+      <!-- SUBTAB 4: 3-TIER HIERARCHICAL MEMORY (L1 WORKING / L2 EPISODIC / L3 ON-DEMAND ARCHIVE) -->
+      <div id="wlSub-profile" style="display:none;">
+        <div class="card">
+          <div class="card-title">
+            <span>🧠 3-Tier Hierarchical Memory Architecture (L1 / L2 / L3)</span>
+            <span id="wlMemCountBadge" style="font-size:10px;color:#c084fc;">0 notes</span>
+          </div>
+          <div style="font-size:10.5px;color:#94a3b8;margin-bottom:6px;line-height:1.4;">
+            Small talk only loads compact <b>Tier 1 (L1 Working Digest)</b>; scenarios load <b>Tier 2 (L2 Episodic Summaries)</b>; <b>Tier 3 (L3 Deep Lore &amp; Past Quests)</b> is retrieved on-demand when your message mentions matching keywords!
+          </div>
+          <div id="wlTieredMemoryBox" style="margin-bottom:8px;"></div>
+          <div style="display:flex;gap:5px;margin-bottom:8px;">
+            <input type="text" id="wlMemInput" onkeydown="if(event.key==='Enter')addWaifuMemory()" placeholder="Add custom L1/L3 memory note for her to remember..." style="flex:1;">
+            <button class="btn btn-purple" style="flex:0 0 auto;padding:5px 10px;" onclick="addWaifuMemory()">+ Save Note</button>
+          </div>
+          <div id="wlMemoriesListBox" style="display:flex;flex-direction:column;gap:5px;max-height:190px;overflow-y:auto;"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">
+            <span>📖 5-Layer Character Dossier &amp; GTA SA Sync</span>
+          </div>
+          <div id="wlDossierBox" style="font-size:11.5px;color:#e2e8f0;line-height:1.45;"></div>
+          <div class="btn-row" style="margin-top:8px;">
+            <button class="btn btn-green" onclick="act('dating_sync_ram',{})">🔓 Unlock &amp; Sync All 6 in GTA RAM</button>
+            <button class="btn btn-gold" onclick="act('dating_toggle_blips',{})">🌙 Toggle Vanilla Blips ($406)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBTAB 5: 15 MILESTONE CGS (M01..M15), VISUAL APPEARANCE & COMPLETED PAST QUESTS -->
+      <div id="wlSub-gallery" style="display:none;">
+        <div class="card">
+          <div class="card-title">
+            <span>📸 Milestone Photo Album (15 CGs for Hu Tao: Friendly → Romantic → Spicy)</span>
+            <span id="wlGalleryCountBadge" style="font-size:10px;color:#f9a8d4;">Unlocked</span>
+          </div>
+          <div id="wlGalleryGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">
+            <span>👗 Canonical Visual Appearance &amp; Outfit Bible</span>
+            <span id="wlVisualSkinBadge" style="font-size:10px;color:#6ee7b7;">Skin Info</span>
+          </div>
+          <div id="wlVisualBox" style="font-size:11.5px;color:#e2e8f0;line-height:1.48;"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">
+            <span>⚔️ Completed Past Quests &amp; Events with Traveler Aether (L3 Archive)</span>
+            <span style="font-size:10px;color:#fde68a;">Past Shared History</span>
+          </div>
+          <div id="wlQuestsBox" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">
+            <span>🤝 Character Network &amp; Interactions</span>
+            <span style="font-size:10px;color:#93c5fd;">Teyvat &amp; San Andreas</span>
+          </div>
+          <div id="wlRelationsBox" style="display:flex;flex-direction:column;gap:5px;"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">
+            <span>🎙️ Canonical Voice-Overs, Teapot Lines &amp; Fanfic Tropes</span>
+          </div>
+          <div id="wlQuotesBox" style="font-size:11px;color:#e2e8f0;line-height:1.45;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GIRLFRIEND HOUSE DOORSTEP EVENT SELECTOR MODAL -->
+    <div id="wlHouseVisitModal" style="display:none;position:fixed;inset:0;background:rgba(4,7,17,0.93);z-index:9997;align-items:center;justify-content:center;padding:12px;">
+      <div id="wlHouseVisitContent" style="max-width:540px;width:100%;max-height:92vh;overflow-y:auto;background:linear-gradient(180deg,#0f172a 0%,#1e1028 100%);border:2px solid #fbbf24;border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,0.95);padding:14px;"></div>
+    </div>
+
+    <!-- FULLSCREEN VISUAL NOVEL DATING SIM OVERLAY MODAL -->
+    <div id="wlVnOverlayModal" style="display:none;position:fixed;inset:0;background:rgba(4,7,17,0.96);z-index:9998;align-items:center;justify-content:center;padding:12px;">
+      <div id="wlVnOverlayContent" style="max-width:1180px;width:96vw;max-height:94vh;overflow:hidden;background:#05040c;border:2px solid rgba(244,114,182,0.75);border-radius:16px;box-shadow:0 24px 70px rgba(0,0,0,0.95);"></div>
+    </div>
+
+    <!-- FULLSCREEN PHOTO LIGHTBOX MODAL -->
+    <div id="wlLightboxModal" onclick="closeWaifuLightbox()" style="display:none;position:fixed;inset:0;background:rgba(4,7,17,0.92);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+      <div onclick="event.stopPropagation()" style="max-width:460px;width:100%;background:#0f172a;border:2px solid #f472b6;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.9);">
+        <img id="wlLightboxImg" src="" alt="Girlfriend Photo" style="width:100%;max-height:520px;object-fit:cover;display:block;">
+        <div style="padding:12px 14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <b id="wlLightboxTitle" style="font-size:13.5px;color:#fde68a;"></b>
+            <span id="wlLightboxChar" style="font-size:10.5px;background:#831843;color:#fbcfe8;padding:2px 8px;border-radius:999px;font-weight:800;"></span>
+          </div>
+          <div id="wlLightboxCaption" style="font-size:12px;color:#e2e8f0;line-height:1.45;font-style:italic;"></div>
+          <div style="margin-top:10px;text-align:right;">
+            <button class="btn btn-red" style="padding:5px 14px;" onclick="closeWaifuLightbox()">Close ✕</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- 11-Button Bottom Dock (Home 0 + Apps 1..10) -->
+  <!-- ==================== APP 14: UNIFIED CONTACTS (14 MONDSTADT NPCS + 6 WAIFUS) ==================== -->
+  <div class="app-page" id="page-14">
+    <div class="card" style="background:linear-gradient(135deg,#09192f 0%,#0f2942 60%,#131c38 100%);border-color:#38bdf8;">
+      <div class="card-title" style="margin-bottom:4px;">
+        <span>📱 Contacts &amp; Social Links (14 Mondstadt + 6 Waifus)</span>
+        <span id="ctUnlockBadge" style="font-size:10.5px;background:#0369a1;color:#e0f2fe;padding:2px 8px;border-radius:999px;font-weight:800;">6/20 Unlocked</span>
+      </div>
+      <div style="font-size:11px;color:#cbd5e1;line-height:1.42;margin-bottom:8px;">
+        Meet Mondstadt characters face-to-face on the map (<b>[E]</b>) to exchange contacts and unlock remote messaging! Remote DMs share the exact same <b>SQLite conversation history &amp; memories</b> as in-person Persona talks.
+      </div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;">
+        <button class="pill active" id="ctTabBtn-0" onclick="act('contacts_set_tab',{tab_idx:0})">All (20)</button>
+        <button class="pill" id="ctTabBtn-1" onclick="act('contacts_set_tab',{tab_idx:1})">🍃 Mondstadt (14)</button>
+        <button class="pill" id="ctTabBtn-2" onclick="act('contacts_set_tab',{tab_idx:2})">💖 Waifus (6)</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span>📋 Directory</span>
+        <span style="font-size:10px;color:#93c5fd;">Click any contact to DM or Pin GPS</span>
+      </div>
+      <div id="ctListBox" style="display:flex;flex-direction:column;gap:6px;max-height:240px;overflow-y:auto;"></div>
+    </div>
+
+    <div class="card" id="ctChatCard">
+      <div class="card-title">
+        <span id="ctSelHeader">💬 Messenger</span>
+        <div style="display:flex;gap:5px;">
+          <button class="pill" onclick="act('contacts_pin_gps',{})">📍 Pin GPS</button>
+        </div>
+      </div>
+      <div id="ctChatBody"></div>
+    </div>
+  </div>
+
+  <!-- 15-Button Bottom Dock (Home 0 + Apps 1..14) -->
   <div class="app-dock">
     <button class="dock-btn active" id="dock-0" onclick="switchApp(0)"><span class="icon">🏠</span><span>Home</span></button>
     <button class="dock-btn" id="dock-1" onclick="switchApp(1)"><span class="icon">❤️</span><span data-en="Life" data-vi="SinhHoạt">Life</span></button>
@@ -1094,8 +1356,11 @@ EAGLE_PHONE_HTML = r"""<!DOCTYPE html>
     <button class="dock-btn" id="dock-7" onclick="switchApp(7)"><span class="icon">💼</span><span data-en="Portfolio" data-vi="DanhMục">Portfolio</span></button>
     <button class="dock-btn" id="dock-8" onclick="switchApp(8)"><span class="icon">🐛</span><span data-en="MapBug" data-vi="BáoBug">MapBug</span></button>
     <button class="dock-btn" id="dock-9" onclick="switchApp(9)"><span class="icon">⚙️</span><span data-en="Settings" data-vi="CàiĐặt">Settings</span></button>
-    <button class="dock-btn" id="dock-11" onclick="switchApp(11)"><span class="icon">✨</span><span>Paimon</span></button>
     <button class="dock-btn" id="dock-10" onclick="switchApp(10)"><span class="icon">🗺️</span><span>GGMap</span></button>
+    <button class="dock-btn" id="dock-11" onclick="switchApp(11)"><span class="icon">✨</span><span>Paimon</span></button>
+    <button class="dock-btn" id="dock-12" onclick="switchApp(12)"><span class="icon">🚕</span><span>Ride</span></button>
+    <button class="dock-btn" id="dock-13" onclick="switchApp(13)"><span class="icon">💖</span><span>Waifu</span></button>
+    <button class="dock-btn" id="dock-14" onclick="switchApp(14)"><span class="icon">📱</span><span data-en="Contacts" data-vi="DanhBạ">Contacts</span></button>
   </div>
 </div>
 
@@ -1139,7 +1404,7 @@ function toggleFrameMode() {
 
 function applyActiveAppDOM(appId) {
   currentAppId = appId;
-  for (let i = 0; i <= 11; i++) {
+  for (let i = 0; i <= 14; i++) {
     const pg = document.getElementById('page-' + i);
     const dk = document.getElementById('dock-' + i);
     if (pg) pg.classList.toggle('active', i === appId);
@@ -1149,6 +1414,63 @@ function applyActiveAppDOM(appId) {
   if (pf) pf.classList.toggle('on-home', appId === 0);
   const navHdr = document.getElementById('appNavHeader');
   if (navHdr) navHdr.style.display = (appId === 0) ? 'none' : 'flex';
+}
+
+let wlActiveSubtab = 'chat';
+let wlLastMsgCount = 0;
+let wlLastCharId = '';
+
+function setWaifuSubtab(tab) {
+  wlActiveSubtab = tab;
+  ['chat', 'scenarios', 'dates', 'profile', 'gallery'].forEach(t => {
+    const box = document.getElementById('wlSub-' + t);
+    const btn = document.getElementById('wlTabBtn-' + t);
+    if (box) box.style.display = (t === tab) ? 'block' : 'none';
+    if (btn) btn.classList.toggle('active', t === tab);
+  });
+  act('dating_set_subtab', {subtab: tab});
+}
+
+function sendVnFreeText() {
+  const inp = document.getElementById('wlVnFreeTextInput');
+  if (!inp) return;
+  const txt = inp.value.trim();
+  if (!txt) return;
+  inp.value = '';
+  act('dating_choose_vn', {free_text: txt});
+}
+
+function sendWaifuChat() {
+  const inp = document.getElementById('wlChatInput');
+  if (!inp) return;
+  const txt = inp.value.trim();
+  if (!txt) return;
+  inp.value = '';
+  act('dating_send_message', {text: txt});
+}
+
+function addWaifuMemory() {
+  const inp = document.getElementById('wlMemInput');
+  if (!inp) return;
+  const txt = inp.value.trim();
+  if (!txt) return;
+  inp.value = '';
+  act('dating_add_memory', {text: txt});
+}
+
+function openWaifuLightbox(url, title, charName, caption) {
+  const modal = document.getElementById('wlLightboxModal');
+  if (!modal) return;
+  document.getElementById('wlLightboxImg').src = url;
+  document.getElementById('wlLightboxTitle').textContent = title || 'Smartphone Snapshot';
+  document.getElementById('wlLightboxChar').textContent = '📸 ' + (charName || 'Girlfriend');
+  document.getElementById('wlLightboxCaption').textContent = '"' + (caption || '') + '"';
+  modal.style.display = 'flex';
+}
+
+function closeWaifuLightbox() {
+  const modal = document.getElementById('wlLightboxModal');
+  if (modal) modal.style.display = 'none';
 }
 
 function switchApp(appId) {
@@ -1372,6 +1694,9 @@ function renderAll() {
   const pf = STATE.portfolio || {};
   const bi = STATE.bug_inspector || {};
   const gm = STATE.gg_map || {};
+  const rd = STATE.eagleride || {};
+  const ds = STATE.dating_sim || {};
+  const dsSel = ds.selected || {};
   const appBadges = {
     1: p.loan > 0 ? (isVi ? `Nợ $${p.loan}` : `Debt $${p.loan}`) : '',
     2: isVi ? `${Object.keys(STATE.stocks_market||{}).length} mã` : `${Object.keys(STATE.stocks_market||{}).length} assets`,
@@ -1382,7 +1707,11 @@ function renderAll() {
     7: isVi ? `${(pf.spot_holdings||[]).length + (pf.open_futures||[]).length} vị thế` : `${(pf.spot_holdings||[]).length + (pf.open_futures||[]).length} pos`,
     8: `${bi.reports_count||0} bugs`,
     9: (STATE.lang || 'en').toUpperCase(),
-    10: gm.active_gps ? `📍 ${gm.active_gps.dist_str}` : `${gm.total_pois || 631} POIs`
+    10: gm.active_gps ? `📍 ${gm.active_gps.dist_str}` : `${gm.total_pois || 715} POIs`,
+    11: 'AI',
+    12: rd.active_trip ? `🚕 $${rd.active_trip.fare}` : `${rd.unlocked_count || 18}/${rd.total_pois || 715}`,
+    13: dsSel.short_name ? `💖 ${dsSel.short_name} Lv.${dsSel.stage||1}` : '6 Girls',
+    14: `${((STATE.contacts_app||{}).unlocked_mondstadt_count||0) + 6}/${(STATE.contacts_app||{}).total_contacts || 20}`
   };
 
   document.getElementById('homeIconGrid').innerHTML = homeApps.map((app, idx) => {
@@ -1917,10 +2246,783 @@ function renderAll() {
       </div>
       <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
         <button class="btn btn-green" style="padding:5px 9px;font-size:11px;" onclick="act('set_gps_waypoint',{poi_id:'${item.id}'})">📍 ${isVi?'Chỉ Đường GPS (Mốc T)':'Set GPS Waypoint (Red T)'}</button>
-        <button class="btn btn-blue" style="padding:4px 9px;font-size:10.5px;" onclick="act('teleport_ggmap_poi',{poi_id:'${item.id}'})">⚡ ${isVi?'Dịch Chuyển Tới Đây':'Fast Travel Here'}</button>
+        <button class="btn btn-gold" style="padding:4px 9px;font-size:10.5px;" onclick="switchApp(12);act('ride_book',{poi_id:'${item.id}'})">🚕 ${isVi?'Đặt Xe EagleRide':'Book EagleRide'}</button>
       </div>
     </div>`;
   }).join('') || '<div style="color:var(--muted);padding:10px;">Không tìm thấy địa điểm nào khớp từ khóa.</div>';
+
+  // App 12: EagleRide (Uber / Xanh SM / Grab / Be + Passenger Radio + Fast-Forward)
+  const rdSvcs = rd.services || [];
+  const rdCats = rd.categories || [];
+  const rdPois = rd.pois || [];
+  const rdAct = rd.active_trip || null;
+  document.getElementById('rideUnlockedBadge').textContent = isVi
+    ? `🔓 ${rd.unlocked_count || 18}/${rd.total_pois || 715} Đã Mở Khóa`
+    : `🔓 ${rd.unlocked_count || 18}/${rd.total_pois || 715} Unlocked`;
+  document.getElementById('rideRadioBadge').textContent = rd.radio_name || 'Flash FM';
+  document.getElementById('rideListHeaderTitle').textContent = `📍 ${rd.cat_label || 'Tất Cả'} (${rd.count_str || ''})`;
+  document.getElementById('rideStatsBadge').textContent = isVi
+    ? `${rd.total_trips || 0} chuyến • Đã chi $${(rd.total_spent || 0).toLocaleString()}`
+    : `${rd.total_trips || 0} trips • Spent $${(rd.total_spent || 0).toLocaleString()}`;
+
+  if (rdAct) {
+    document.getElementById('rideActiveTripBox').innerHTML = `
+      <div style="background:linear-gradient(90deg, rgba(6,78,59,0.94), rgba(15,23,42,0.96));border:1.5px solid #10b981;border-radius:10px;padding:9px 11px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+          <div>
+            <div style="font-size:12px;font-weight:800;color:#6ee7b7;">🚕 ${isVi?'CHUYẾN XE ĐANG CHẠY':'ACTIVE EAGLERIDE TRIP'} [${rd.ride_state}]: <span style="color:#fde68a;">${rdAct.service_short} → ${rdAct.poi_name}</span></div>
+            <div style="font-size:11px;color:#e2e8f0;margin-top:2px;">💵 ${isVi?'Giá cước':'Fare'}: <b>$${rdAct.fare.toLocaleString()}</b> • 📏 ${isVi?'Còn lại':'Remaining'}: <b>${Math.round(rdAct.remaining_dist_m || 0)}m</b> (Node ${rdAct.wp_idx}/${rdAct.total_wps}) • 📻 Radio: <b>${rdAct.radio_station}</b></div>
+          </div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;">
+            <button class="btn btn-gold" style="flex:0 0 auto;padding:5px 10px;" onclick="act('ride_fast_forward', {})">⏩ ${isVi?'Tua Nhanh Tới Nơi (F10)':'Fast-Forward Arrival (F10)'}</button>
+            <button class="btn btn-red" style="flex:0 0 auto;padding:5px 10px;" onclick="act('ride_cancel', {})">❌ ${isVi?'Hủy Chuyến':'Cancel Ride'}</button>
+          </div>
+        </div>
+      </div>
+    `;
+  } else {
+    document.getElementById('rideActiveTripBox').innerHTML = `
+      <div style="background:#0a101f;border:1px solid #263554;border-radius:9px;padding:6px 10px;font-size:11px;color:#93c5fd;">
+        ${isVi
+          ? '💡 Chọn hãng xe (<b>Uber / Xanh SM / Grab / Be</b>) rồi bấm <b>🚕 Đặt Xe</b> tới bất kỳ địa điểm nào bạn đã từng tự lái xe tới (&le;85m). Trong lúc ngồi xe có thể đổi Radio (phím <b>O</b>) hoặc bấm <b>F10</b> để tua nhanh tới nơi!'
+          : '💡 Select a ride brand (<b>Uber / Xanh SM / Grab / Be</b>) and click <b>🚕 Book Ride</b> to any POI you have visited in person (&le;85m). Change Radio freely (key <b>O</b>) or press <b>F10</b> to fast-forward arrival!'}
+      </div>
+    `;
+  }
+
+  document.getElementById('rideServiceGrid').innerHTML = rdSvcs.map(s => {
+    const active = (s.idx === (rd.service_idx || 0));
+    const icon = (s.kind === 'BIKE') ? '🛵' : '🚘';
+    return `<div onclick="act('ride_select_service',{service_idx:${s.idx}})" style="cursor:pointer;background:${active?'rgba(6, 182, 212, 0.22)':'#0b1324'};border:1.5px solid ${active?'#06b6d4':'#233252'};border-radius:10px;padding:6px 5px;text-align:center;">
+      <div style="font-size:14px;">${icon}</div>
+      <div style="font-size:10.5px;font-weight:800;color:${active?'#fde68a':'#f1f5f9'};">${s.idx+1}. ${s.short}</div>
+      <div style="font-size:9.5px;color:#6ee7b7;">$${s.base_fare} + $${s.per_km}/km</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('rideCatPills').innerHTML =
+    `<button class="pill ${rd.filter_visited_only?'active':''}" onclick="act('ride_toggle_filter',{})">🔓 ${isVi?'Chỉ Hiện Đã Mở':'Unlocked Only'}</button>` +
+    rdCats.map(c =>
+      `<button class="pill ${c.idx===(rd.cat_idx||0)?'active':''}" onclick="act('ride_select_cat',{cat_idx:${c.idx}})">${c.idx+1}. ${c.short}</button>`
+    ).join('');
+
+  const rideInpEl = document.getElementById('rideSearchInput');
+  if (rideInpEl && document.activeElement !== rideInpEl && typeof rd.search_query === 'string' && rideInpEl.value !== rd.search_query) {
+    rideInpEl.value = rd.search_query;
+  }
+  const rideKw = ((rideInpEl?.value) || '').trim().toLowerCase();
+  const visibleRidePois = rideKw
+    ? rdPois.filter(item =>
+        (item.name || '').toLowerCase().includes(rideKw) ||
+        (item.region || '').toLowerCase().includes(rideKw) ||
+        (item.desc || item.note || '').toLowerCase().includes(rideKw)
+      )
+    : rdPois.slice(0, 80);
+
+  document.getElementById('ridePoiListBox').innerHTML = visibleRidePois.map(item => {
+    const isOpen = !!item.unlocked;
+    const isSel = rd.selected_poi && rd.selected_poi.id === item.id;
+    const borderCol = isSel ? '#f59e0b' : (isOpen ? '#059669' : '#334155');
+    const bgCol = isSel ? 'rgba(30, 58, 138, 0.55)' : (isOpen ? '#0b1628' : 'rgba(15, 23, 42, 0.65)');
+    return `<div style="background:${bgCol};border:1.5px solid ${borderCol};border-radius:10px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <b style="font-size:12.5px;color:${isOpen?'#fde68a':'#94a3b8'};">${isOpen?'🔓':'🔒'} ${item.name}</b>
+          <span style="background:#1e293b;color:#c084fc;font-size:10px;font-weight:800;padding:1px 6px;border-radius:999px;">${item.region}</span>
+          <span style="background:#0284c7;color:#fff;font-size:10px;font-weight:800;padding:1px 7px;border-radius:999px;">📏 ${item.dist_str}</span>
+          <span style="background:${isOpen?'#059669':'#b45309'};color:#fff;font-size:10px;font-weight:800;padding:1px 7px;border-radius:999px;">💵 $${(item.fare||0).toLocaleString()}</span>
+        </div>
+        <div style="font-size:11px;color:#e2e8f0;margin-top:3px;">${item.desc || item.note || ''}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
+        ${isOpen
+          ? `<button class="btn btn-green" style="padding:5px 9px;font-size:11px;" onclick="act('ride_book',{poi_id:'${item.id}'})">🚕 ${isVi?'Đặt Xe Ngay':'Book Ride'}</button>`
+          : `<button class="btn btn-gold" style="padding:5px 9px;font-size:10.5px;" onclick="act('ride_book',{poi_id:'${item.id}'})">📍 ${isVi?'Chưa Tới (Cắm GPS)':'Locked (Pin GPS)'}</button>`
+        }
+      </div>
+    </div>`;
+  }).join('') || '<div style="color:var(--muted);padding:10px;">Không tìm thấy địa điểm nào khớp bộ lọc.</div>';
+
+  // App 13: WaifuLink (6 Girlfriends Dating Sim, Memory & Photos)
+  renderWaifuLink(ds);
+  // App 14: Contacts & Remote Messenger
+  renderContactsApp(STATE.contacts_app);
+}
+
+function escapeJsStr(s) {
+  return String(s || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
+}
+
+let wlLastVnJson = '';
+
+function renderWaifuLink(ds) {
+  if (!ds || !ds.roster) return;
+  const roster = ds.roster || [];
+  const sel = ds.selected || roster[0] || {};
+  const msgs = ds.messages || [];
+  const mems = ds.memories || [];
+  const gifts = ds.gifts || [];
+  const gallery = ds.gallery || [];
+
+  const aiBadgeEl = document.getElementById('wlAiModelBadge');
+  if (aiBadgeEl) {
+    aiBadgeEl.textContent = '🤖 AI: ' + (ds.ai_status || ds.ai_model || 'gpt-6-luna (OpenAI Live)');
+  }
+
+  const safetyEl = document.getElementById('wlSafetyBadge');
+  if (safetyEl) {
+    safetyEl.textContent = ds.hot_coffee_guard_enabled
+      ? (ds.vanilla_blips_hibernated ? '🛡️ Hot Coffee: LOCKED • Pure Sim' : '🛡️ Hot Coffee: LOCKED')
+      : '⚠️ Censor Unlocked';
+  }
+
+  // 1. Roster Strip (6 Girlfriends — Hu Tao marked as Full v4.0 Pilot)
+  const stripEl = document.getElementById('wlRosterStrip');
+  if (stripEl) {
+    stripEl.innerHTML = roster.map(g => {
+      const isAct = (g.id === sel.id);
+      return `<div onclick="act('dating_select_char',{char_id:'${g.id}'})" style="position:relative;cursor:pointer;background:${isAct?'rgba(244,114,182,0.22)':'#091020'};border:1.5px solid ${isAct?g.accent_color:'#233252'};border-radius:10px;padding:5px 3px;text-align:center;transition:transform 0.15s;">
+        ${g.is_pilot_complete ? `<span style="position:absolute;top:2px;right:2px;background:#dc2626;color:#fff;font-size:7.5px;font-weight:900;padding:1px 4px;border-radius:999px;">v4★</span>` : ''}
+        <img src="${g.avatar_url}" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid ${g.accent_color};margin:0 auto 3px auto;display:block;">
+        <div style="font-size:10px;font-weight:800;color:${isAct?'#fde68a':'#f1f5f9'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${g.short_name}</div>
+        <div style="font-size:8.5px;color:${g.stage_color};font-weight:700;">Lv.${g.stage} • ${g.affection}♥</div>
+      </div>`;
+    }).join('');
+  }
+
+  // 2. Selected Girlfriend Header Card + 5-Heart HUD + 3-Pillar Progression + House Doorstep Trigger
+  const hdrEl = document.getElementById('wlSelectedHeader');
+  if (hdrEl && sel.id) {
+    const heartsHtml = [1, 2, 3, 4, 5].map(sNum =>
+      `<span style="font-size:12px;color:${sNum <= sel.stage ? '#f43f5e' : '#475569'};margin-right:2px;">${sNum <= sel.stage ? '♥' : '♡'}</span>`
+    ).join('');
+    const msDotsHtml = Array.from({length: 15}, (_, idx) => {
+      const mReq = Math.round((idx + 1) * 62);
+      const reached = sel.affection >= mReq;
+      return `<span title="Milestone M${String(idx+1).padStart(2,'0')} (${mReq} ♥)" style="display:inline-block;width:9px;height:6px;border-radius:2px;background:${reached ? '#f472b6' : '#1e293b'};border:1px solid ${reached ? '#fde68a' : '#334155'};"></span>`;
+    }).join('');
+    const gateHtml = sel.stage_gate_locked
+      ? `<div style="margin-top:4px;background:rgba(185,28,28,0.35);border:1px solid #f87171;border-radius:7px;padding:3px 7px;font-size:9.5px;color:#fecaca;font-weight:800;">
+           🔒 Stage-Gate Locked at ${sel.affection} ♥! Pass ${sel.stage_scenarios_req - sel.stage_scenarios_passed} more Stage-${sel.stage} VN Scenario(s) to advance to Stage ${sel.stage + 1}! (Carryover scenarios from earlier stages stay playable for +35 ♥ &amp; 4 CGs!)
+         </div>`
+      : '';
+    const houseCoords = sel.home_coords || [0, 0, 0];
+    hdrEl.innerHTML = `
+      <div style="display:flex;gap:10px;align-items:center;">
+        <img src="${sel.avatar_url}" onclick="openWaifuLightbox('${sel.avatar_url}','${escapeJsStr(sel.name)}','${escapeJsStr(sel.short_name)}','${escapeJsStr(sel.bio)}')" style="cursor:pointer;width:66px;height:66px;border-radius:14px;object-fit:cover;border:2px solid ${sel.accent_color};flex-shrink:0;" title="Click to enlarge CG">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:4px;flex-wrap:wrap;">
+            <b style="font-size:13.5px;color:#fff;">${sel.monogram || ''} ${sel.name} ${sel.is_pilot_complete ? '<span style="background:#dc2626;color:#fde68a;font-size:9px;padding:1px 6px;border-radius:999px;margin-left:4px;">★ v4.0 Pilot (15 CGs • 20×4 Couple CGs)</span>' : ''}</b>
+            <span style="background:#1e293b;color:#f9a8d4;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:999px;">Mood: ${sel.mood}</span>
+          </div>
+          <div style="font-size:10.5px;color:#cbd5e1;margin-top:1px;">${sel.title} • <span style="color:#fde68a;">🏠 Home: ${sel.home_label || ''} (${houseCoords[0]}, ${houseCoords[1]})</span></div>
+          <!-- 5-Heart Relationship Stage & 15-Milestone Progress HUD -->
+          <div style="margin-top:5px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;font-weight:800;margin-bottom:2px;">
+              <span>${heartsHtml} <span style="color:${sel.stage_color};">Stage ${sel.stage}/5: ${sel.stage_title} (${sel.stage_subtitle})</span></span>
+              <span style="color:#fde68a;">${sel.affection} / ${sel.next_stage_pts} ♥</span>
+            </div>
+            <div style="height:8px;background:#090d16;border-radius:999px;overflow:hidden;border:1px solid #334155;">
+              <div style="width:${sel.stage_progress_pct}%;height:100%;background:linear-gradient(90deg, ${sel.accent_color}, #f472b6, #fde68a);"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:3px;gap:4px;">
+              <span style="font-size:9px;color:#fbcfe8;font-weight:700;">📸 15 Milestone Goal Track:</span>
+              <div style="display:flex;gap:2px;flex-wrap:wrap;">${msDotsHtml}</div>
+            </div>
+            <!-- 3-Pillar Economy Caps & Scenario Gate Counters -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:5px;">
+              <div style="background:#091020;border:1px solid #1e293b;border-radius:6px;padding:3px 6px;font-size:9.5px;text-align:center;">
+                <span style="color:#93c5fd;font-weight:800;">💬 Chat Cap:</span> <b style="color:#fff;">${sel.stage_chat_pts || 0}/${sel.stage_chat_cap || 45}</b>
+              </div>
+              <div style="background:#091020;border:1px solid #1e293b;border-radius:6px;padding:3px 6px;font-size:9.5px;text-align:center;">
+                <span style="color:#6ee7b7;font-weight:800;">🚗 Free-Roam:</span> <b style="color:#fff;">${sel.stage_freeroam_pts || 0}/${sel.stage_freeroam_cap || 75}</b>
+              </div>
+              <div style="background:#091020;border:1px solid ${sel.stage_scenarios_passed >= sel.stage_scenarios_req ? '#10b981' : '#f59e0b'};border-radius:6px;padding:3px 6px;font-size:9.5px;text-align:center;">
+                <span style="color:#fde68a;font-weight:800;">🎭 Stage ${sel.stage} Gate:</span> <b style="color:#fff;">${sel.stage_scenarios_passed || 0}/${sel.stage_scenarios_req || 3} VN</b>
+              </div>
+            </div>
+            <!-- House Visit Event Selector Quick Triggers -->
+            <div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;">
+              <button class="btn btn-gold" style="flex:1;padding:4px 8px;font-size:10px;" onclick="act('dating_open_house_menu',{char_id:'${sel.id}'})">
+                🏠 Visit ${sel.short_name}'s House (Open Event Menu)
+              </button>
+              <button class="btn btn-blue" style="flex:0 0 auto;padding:4px 8px;font-size:10px;" onclick="act('dating_teleport_house',{char_id:'${sel.id}'})" title="Teleport Aether to her house doorstep in GTA SA and open Event Menu">
+                📍 Teleport to Her Doorstep
+              </button>
+            </div>
+            ${gateHtml}
+            ${sel.active_stage_persona ? `<div style="font-size:9.5px;color:#e9d5ff;margin-top:3px;font-style:italic;">🎭 ${sel.active_stage_persona}</div>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // 3. Chat Messages (Roleplay Protagonist = Traveler Aether + Dual-Channel Inner Thought / Action Cue + Clickable Milestone CGs)
+  const chatBox = document.getElementById('wlChatMessagesBox');
+  if (chatBox) {
+    const shouldScroll = (msgs.length !== wlLastMsgCount) || (sel.id !== wlLastCharId);
+    wlLastMsgCount = msgs.length;
+    wlLastCharId = sel.id;
+    chatBox.innerHTML = msgs.map(m => {
+      const isMe = (m.sender === 'player');
+      const align = isMe ? 'flex-end' : 'flex-start';
+      const bg = isMe ? 'linear-gradient(135deg, #0284c7, #1d4ed8)' : 'rgba(30, 41, 59, 0.95)';
+      const border = isMe ? '#38bdf8' : sel.accent_color;
+      const thoughtHtml = (!isMe && m.inner_thought) ? `
+        <div style="background:rgba(88, 28, 135, 0.36);border-left:2.5px solid #c084fc;border-radius:6px;padding:4px 7px;margin-bottom:4px;font-size:10px;color:#e9d5ff;">
+          <b>${sel.inner_channel_label || '💭 Inner Thought'}:</b> <i>${m.inner_thought}</i>
+        </div>
+      ` : '';
+      const actionHtml = (!isMe && m.action_cue) ? `
+        <div style="font-size:10.5px;color:#fde68a;font-style:italic;margin-bottom:3px;">${m.action_cue}</div>
+      ` : '';
+      const photoHtml = m.photo_url ? `
+        <div style="margin-top:6px;border-radius:10px;overflow:hidden;border:1.5px solid rgba(255,255,255,0.22);cursor:pointer;background:#050811;"
+             onclick="openWaifuLightbox('${m.photo_url}','${escapeJsStr(m.photo_title || sel.name)}','${escapeJsStr(sel.short_name)}','${escapeJsStr(m.photo_caption || m.text)}')">
+          <img src="${m.photo_url}" alt="${m.photo_title}" style="width:100%;max-height:220px;object-fit:cover;display:block;">
+          <div style="padding:5px 8px;font-size:10px;color:#fbcfe8;display:flex;justify-content:space-between;align-items:center;">
+            <span>📸 <b>${m.photo_title || 'Milestone CG'}</b></span>
+            <span style="color:#fde68a;">🔍 Tap to Enlarge</span>
+          </div>
+        </div>
+      ` : '';
+      const deltaBadge = (!isMe && m.affection_delta !== 0)
+        ? `<span style="color:${m.affection_delta > 0 ? '#f472b6' : '#f87171'};font-weight:800;margin-left:5px;">${m.affection_delta > 0 ? '+' : ''}${m.affection_delta} ♥</span>`
+        : '';
+      return `<div style="display:flex;flex-direction:column;align-items:${align};">
+        <div style="max-width:88%;background:${bg};border:1px solid ${border};border-radius:12px;padding:7px 10px;font-size:11.5px;color:#f8fafc;line-height:1.42;">
+          <div style="font-size:9.5px;color:${isMe?'#bae6fd':'#f9a8d4'};font-weight:800;margin-bottom:3px;">
+            ${isMe ? 'You (Traveler Aether)' : sel.short_name} ${m.mood ? `• [${m.mood}]` : ''} <span style="color:#94a3b8;font-weight:400;">${m.created_at || ''}</span>${deltaBadge}
+          </div>
+          ${thoughtHtml}
+          ${actionHtml}
+          <div>${m.text}</div>
+          ${photoHtml}
+        </div>
+      </div>`;
+    }).join('');
+    if (shouldScroll) {
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  }
+
+  // 4A. Live AI Recommended Dialogue Options (suggested_replies)
+  const sugBox = document.getElementById('wlSuggestedRepliesBox');
+  if (sugBox) {
+    const sugs = sel.suggested_replies || [];
+    sugBox.innerHTML = sugs.map(s => `
+      <button class="btn" style="text-align:left;justify-content:space-between;background:linear-gradient(90deg,rgba(88,28,135,0.45),rgba(30,41,59,0.9));border:1px solid #c084fc;padding:5px 9px;font-size:11px;color:#f8fafc;"
+              onclick="act('dating_send_message',{char_id:'${sel.id}',choice_id:'${s.id}',text:'${escapeJsStr(s.player_text)}'})">
+        <span>⚡ <b>${s.label}:</b> "${s.player_text}"</span>
+        <span style="color:#fde68a;font-weight:800;margin-left:6px;flex-shrink:0;">+6 ♥</span>
+      </button>
+    `).join('');
+  }
+
+  // 4B. Pre-Generated Stage Chat Topics / Starters
+  const choicesBox = document.getElementById('wlChoicesBox');
+  if (choicesBox) {
+    const choices = sel.stage_chat_starters || sel.hangout_choices || [];
+    choicesBox.innerHTML = choices.map(c => `
+      <button class="btn" style="text-align:left;justify-content:space-between;background:#111c33;border:1px solid #334155;padding:5px 9px;font-size:10.5px;color:#e2e8f0;"
+              onclick="act('dating_send_message',{char_id:'${sel.id}',choice_id:'${c.id}',text:'${escapeJsStr(c.player_text || c.label)}'})">
+        <span>💬 ${c.label}</span>
+        <span style="color:#f472b6;font-weight:800;margin-left:6px;flex-shrink:0;">+6 ♥</span>
+      </button>
+    `).join('');
+  }
+
+  // 5. Visual Novel Scenarios List (20 Authored Scenarios for Hu Tao + 4 Couple CGs Each + Carryover Rule)
+  const scListBox = document.getElementById('wlScenariosListBox');
+  if (scListBox) {
+    const scs = sel.scenarios || [];
+    scListBox.innerHTML = scs.map(sc => {
+      const isDone = !!sc.completed;
+      const isOpen = !!sc.unlocked;
+      const isCarry = !!sc.is_carryover;
+      const borderCol = isDone ? '#10b981' : (isCarry ? '#f59e0b' : (isOpen ? sel.accent_color : '#334155'));
+      const cgSeq = sc.cg_sequence || [];
+      const filmstripHtml = cgSeq.map(cgItem => `
+        <div onclick="openWaifuLightbox('${cgItem.url}','${escapeJsStr(sc.title + ' — ' + cgItem.label)}','${escapeJsStr(sel.short_name + ' & Traveler Aether')}','${escapeJsStr(sc.summary_l2)}')"
+             style="cursor:pointer;position:relative;border-radius:6px;overflow:hidden;border:1px solid ${borderCol};">
+          <img src="${cgItem.url}" style="width:100%;height:42px;object-fit:cover;display:block;">
+          <div style="background:rgba(9,13,24,0.88);font-size:8px;color:#fde68a;text-align:center;padding:1px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+            Scene ${cgItem.scene_num}/4
+          </div>
+        </div>
+      `).join('');
+      const badgeBg = isDone ? '#065f46' : (isCarry ? '#78350f' : (isOpen ? '#831843' : '#1e293b'));
+      const badgeCol = isDone ? '#6ee7b7' : (isCarry ? '#fde68a' : (isOpen ? '#fbcfe8' : '#94a3b8'));
+      const cameoCast = (sc.cameo_cast || []).join(', ');
+      const cameoPill = sc.is_extra_cameo
+        ? `<span style="background:#3b0764;border:1px solid #c084fc;color:#f3e8ff;font-size:8.5px;font-weight:900;padding:1px 7px;border-radius:999px;">🌟 EXTRA GENSHIN CAMEO: ${cameoCast}</span>`
+        : `<span style="background:#0f172a;border:1px solid #475569;color:#cbd5e1;font-size:8.5px;font-weight:800;padding:1px 6px;border-radius:999px;">💖 CORE ROMANCE</span>`;
+      return `<div style="background:#0b1324;border:1.5px solid ${borderCol};border-radius:11px;padding:8px 10px;">
+        <div style="display:flex;gap:9px;align-items:center;">
+          <img src="${sc.cg_url}" onclick="openWaifuLightbox('${sc.cg_url}','${escapeJsStr(sc.title)}','${escapeJsStr(sel.short_name + ' & Aether')}','${escapeJsStr(sc.summary_l2)}')" style="cursor:pointer;width:72px;height:54px;border-radius:8px;object-fit:cover;border:1px solid ${borderCol};flex-shrink:0;">
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+              <span style="background:#1e293b;color:#fde68a;font-size:9px;font-weight:800;padding:1px 6px;border-radius:999px;">Stage ${sc.stage} • #${sc.order}</span>
+              ${cameoPill}
+              <b style="font-size:12px;color:#fff;">${sc.title}</b>
+              <span style="background:${badgeBg};color:${badgeCol};font-size:8.5px;font-weight:800;padding:1px 6px;border-radius:999px;">${sc.stage_status_badge || ''}</span>
+            </div>
+            <div style="font-size:10px;color:#f9a8d4;margin-top:2px;">📍 ${sc.location} — ${sc.subtitle}</div>
+            ${sc.cameo_dynamic_tier ? `<div style="font-size:9.5px;color:#e9d5ff;margin-top:1px;">🤝 ${sc.cameo_dynamic_tier}</div>` : ''}
+            <div style="font-size:9.5px;color:#94a3b8;margin-top:2px;">Reward: +${sc.reward_affection} ♥ • 4 Unique 16:9 CGs • Pre-Gen + Custom Input (Anti-Stuck Active)</div>
+          </div>
+          <button class="btn ${isDone ? 'btn-blue' : (isCarry ? 'btn-gold' : 'btn-purple')}" style="flex:0 0 auto;padding:6px 10px;font-size:10.5px;"
+                  onclick="act('dating_start_vn',{char_id:'${sel.id}',scenario_id:'${sc.id}'})">
+            ${isDone ? '🔄 Replay VN' : (isCarry ? '🔄 Carryover VN' : '▶ Start VN')}
+          </button>
+        </div>
+        ${cgSeq.length > 0 ? `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:6px;">${filmstripHtml}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  // 5A. Girlfriend House Doorstep Event Selector Modal
+  const hmModal = document.getElementById('wlHouseVisitModal');
+  const hmContent = document.getElementById('wlHouseVisitContent');
+  if (hmModal && hmContent) {
+    const hm = ds.active_house_menu;
+    if (!hm) {
+      hmModal.style.display = 'none';
+    } else {
+      hmModal.style.display = 'flex';
+      const optsHtml = (hm.options || []).map((o, idx) => `
+        <button class="btn" style="text-align:left;justify-content:space-between;background:linear-gradient(90deg,#1e1b4b,#31102f);border:1.5px solid #fbbf24;padding:8px 11px;color:#fff;"
+                onclick="act('dating_select_house_opt',{option_idx:${idx}})">
+          <div>
+            <div style="font-size:11.5px;font-weight:900;color:#fde68a;">[${idx + 1}] ${o.label}</div>
+            <div style="font-size:9.5px;color:#cbd5e1;margin-top:2px;">${o.sub || ''}</div>
+          </div>
+          <span style="color:#6ee7b7;font-size:10.5px;font-weight:800;margin-left:8px;flex-shrink:0;">Start ▶</span>
+        </button>
+      `).join('');
+      hmContent.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div>
+            <div style="font-size:14.5px;font-weight:900;color:#fde68a;">🏠 At ${hm.char_name}'s Home (${hm.home_label})</div>
+            <div style="font-size:10.5px;color:#f9a8d4;">Stage ${hm.stage}: ${hm.stage_title} • ${hm.affection}/1000 ♥ • Stage Gate: ${hm.stage_scenarios_passed}/3 VN</div>
+          </div>
+          <button class="btn btn-red" style="padding:4px 10px;font-size:10px;" onclick="act('dating_close_house_menu',{})">✕ Leave Doorstep</button>
+        </div>
+        <div style="font-size:10.5px;color:#cbd5e1;margin-bottom:9px;">
+          Choose which event to start with <b>${hm.short_name}</b> right from her doorstep (also controllable in-game via <b>[1-5]</b> or <b>[I/K + F9]</b>):
+        </div>
+        <div style="display:flex;flex-direction:column;gap:7px;">${optsHtml}</div>
+      `;
+    }
+  }
+
+  // 5B. Fullscreen 4-Scene Visual Novel Overlay Modal (Renders over screen & auto-closes after Scene 4/4)
+  const vnModal = document.getElementById('wlVnOverlayModal');
+  const vnContent = document.getElementById('wlVnOverlayContent');
+  if (vnModal && vnContent) {
+    const vn = ds.active_vn_session;
+    if (!vn) {
+      vnModal.style.display = 'none';
+      wlLastVnJson = '';
+    } else {
+      vnModal.style.display = 'flex';
+      const curVnJson = JSON.stringify(vn);
+      if (curVnJson !== wlLastVnJson) {
+        wlLastVnJson = curVnJson;
+        const cgSeq = vn.cg_sequence || [];
+        const scNum = vn.scene_num || 1;
+        const activeCgObj = cgSeq[Math.max(0, Math.min(cgSeq.length - 1, scNum - 1))] || {url: vn.ending_cg_url || '/dating-media/hutao_sc01_cg1.jpg', label: 'Scene ' + scNum + '/4'};
+        const activeCgUrl = vn.finished ? (vn.ending_cg_url || activeCgObj.url) : activeCgObj.url;
+        const activeSceneLbl = vn.finished ? (vn.ending_scene_label || 'Scene 4/4 • Couple Ending') : (activeCgObj.label || ('Scene ' + scNum + '/4'));
+
+        const strip4Html = cgSeq.map(cItem => {
+          const isCur = (cItem.scene_num === scNum);
+          const isPast = (cItem.scene_num < scNum) || vn.finished;
+          return `<div style="background:${isCur ? '#be185d' : (isPast ? '#065f46' : '#0f172a')};border:1px solid ${isCur ? '#fde68a' : '#334155'};border-radius:6px;padding:3px 5px;text-align:center;">
+            <div style="font-size:8.5px;font-weight:900;color:#fff;">SCENE ${cItem.scene_num}/4 ${isCur ? '◀' : (isPast ? '✓' : '')}</div>
+          </div>`;
+        }).join('');
+
+        const lr = vn.last_reaction;
+        const isReask = lr && lr.off_topic_action === 'REASK_CURRENT_NODE';
+        const isAntiStuck = lr && lr.off_topic_action === 'ANTI_STUCK_BRIDGE';
+        const reactBorder = isReask ? '#f59e0b' : (isAntiStuck ? '#c084fc' : (lr && lr.grade==='BEST'?'#10b981':(lr && lr.grade==='GOOD'?'#38bdf8':'#f87171')));
+        const reactTag = isReask
+          ? '🔄 AI OFF-TOPIC RE-ASK (Current Scene Stays Active — Please Answer Properly!)'
+          : (isAntiStuck ? '🛡️ ANTI-STUCK GRACEFUL BRIDGE (+10 pts — Auto-Advanced So Scenario Never Locks!)' : `[${lr ? lr.grade : ''} +${lr ? lr.score : 0} pts]`);
+        const lastReactHtml = lr ? `
+          <div style="background:rgba(15,23,42,0.94);border:1.5px solid ${reactBorder};border-radius:10px;padding:8px 10px;margin-bottom:9px;">
+            <div style="font-size:9.5px;color:#93c5fd;font-weight:800;margin-bottom:2px;">
+              Traveler Aether: "${lr.player_text}" • <span style="color:#fde68a;">${reactTag}</span>
+            </div>
+            ${lr.reaction_thought ? `<div style="font-size:10px;color:#e9d5ff;font-style:italic;margin-bottom:2px;">🦋 ${lr.reaction_thought}</div>` : ''}
+            ${lr.reaction_action ? `<div style="font-size:10px;color:#fde68a;font-style:italic;margin-bottom:2px;">${lr.reaction_action}</div>` : ''}
+            <div style="font-size:11.5px;color:#fff;"><b>${vn.short_name}:</b> "${lr.reaction_reply}"</div>
+          </div>
+        ` : '';
+        const cameoBannerHtml = (vn.is_extra_cameo && (vn.cameo_cast || []).length > 0) ? `
+          <div style="background:rgba(59,7,100,0.48);border:1px solid #c084fc;border-radius:8px;padding:5px 8px;font-size:10px;color:#f3e8ff;margin-bottom:7px;">
+            🌟 <b>Extra Genshin Cameo Cast:</b> ${(vn.cameo_cast || []).join(', ')} — <i>${vn.cameo_dynamic_tier || ''}</i>
+          </div>
+        ` : '';
+
+        if (vn.finished) {
+          vnContent.innerHTML = `
+            <div style="position:relative;width:100%;aspect-ratio:16/9;max-height:90vh;background:#04040a;overflow:hidden;">
+              <img src="${activeCgUrl}" style="width:100%;height:100%;object-fit:cover;display:block;">
+              <div style="position:absolute;top:10px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                <div style="background:rgba(8,10,22,0.56);backdrop-filter:blur(6px);border:1px solid rgba(244,114,182,0.65);padding:4px 12px;border-radius:999px;font-size:11px;font-weight:800;color:#fde68a;">
+                  🎭 ${activeSceneLbl} • ${vn.is_carryover ? `Carryover Stage ${vn.stage}` : `Stage ${vn.stage}`}
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(4,auto);gap:5px;opacity:0.9;">${strip4Html}</div>
+              </div>
+              <div style="position:absolute;left:16px;right:16px;bottom:12px;background:rgba(8,10,22,0.58);backdrop-filter:blur(7px);border-top:2px solid rgba(244,114,182,0.8);border-radius:12px;padding:12px 16px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+                  <span style="background:rgba(136,19,55,0.82);color:#fef08a;font-weight:900;font-size:12px;padding:3px 12px;border-radius:8px;">${vn.title} — ${vn.passed ? '✅ SCENARIO PASSED!' : '⚠️ RETRY AVAILABLE'}</span>
+                  <span style="font-size:11px;color:#f9a8d4;font-weight:700;">📍 ${vn.location} • Score: ${vn.total_score}/45 • +${vn.effective_affection_gain || 0} ♥</span>
+                </div>
+                ${lastReactHtml}
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:6px;">
+                  <div style="font-size:11px;color:#a7f3d0;font-weight:800;">⏱️ Auto-closing overlay after Scene 4/4 to return to gameplay!</div>
+                  <div style="display:flex;gap:8px;">
+                    <button class="btn btn-purple" onclick="act('dating_start_vn',{char_id:'${vn.char_id}',scenario_id:'${vn.scenario_id}'})">🔄 Replay</button>
+                    <button class="btn btn-green" onclick="act('dating_close_vn',{})">✅ Finish &amp; Return</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        } else if (vn.current_node) {
+          const nd = vn.current_node;
+          const choicesHtml = (nd.choices || []).map((c, idx) => `
+            <button class="btn" style="text-align:left;justify-content:space-between;background:rgba(15,23,42,0.52);border:1px solid rgba(244,114,182,0.55);padding:6px 12px;font-size:11.5px;color:#fff;"
+                    onclick="act('dating_choose_vn',{choice_id:'${c.id}'})">
+              <span><b>[${idx + 1}] ${c.label}:</b> "${c.player_text}"</span>
+              <span style="color:#fde68a;font-size:10px;margin-left:6px;flex-shrink:0;">Select ▶</span>
+            </button>
+          `).join('');
+          vnContent.innerHTML = `
+            <div style="position:relative;width:100%;aspect-ratio:16/9;max-height:90vh;background:#04040a;overflow:hidden;">
+              <img src="${activeCgUrl}" style="width:100%;height:100%;object-fit:cover;display:block;">
+              <div style="position:absolute;top:10px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                <div style="background:rgba(8,10,22,0.56);backdrop-filter:blur(6px);border:1px solid rgba(244,114,182,0.65);padding:4px 12px;border-radius:999px;font-size:11px;font-weight:800;color:#fde68a;">
+                  🎭 ${activeSceneLbl} • ${vn.is_carryover ? `🔄 Carryover Stage ${vn.stage}` : `🎯 Stage ${vn.stage}`}
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <div style="display:grid;grid-template-columns:repeat(4,auto);gap:4px;opacity:0.9;">${strip4Html}</div>
+                  <button onclick="act('dating_close_vn',{})" style="background:rgba(127,29,29,0.78);color:#fff;border:1px solid #f87171;border-radius:999px;padding:3px 10px;font-size:10px;font-weight:800;cursor:pointer;">✕ Exit</button>
+                </div>
+              </div>
+              <div style="position:absolute;left:16px;right:16px;bottom:12px;background:rgba(8,10,22,0.58);backdrop-filter:blur(7px);border-top:2px solid rgba(244,114,182,0.82);border-radius:12px;padding:10px 16px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                  <span style="background:rgba(136,19,55,0.85);color:#fef08a;font-weight:900;font-size:12.5px;padding:2px 12px;border-radius:7px;">${vn.char_name} ${nd.action_cue ? `<span style="color:#fbcfe8;font-weight:600;font-style:italic;font-size:11px;margin-left:6px;">${nd.action_cue}</span>` : ''}</span>
+                  <span style="font-size:10.5px;color:#fde68a;background:rgba(15,23,42,0.65);padding:2px 10px;border-radius:999px;">${vn.title} ${vn.is_extra_cameo && (vn.cameo_cast||[]).length ? '• 🌟 ' + vn.cameo_cast.join(', ') : ''}</span>
+                </div>
+                ${lastReactHtml}
+                <div style="font-size:11px;color:#f9a8d4;font-style:italic;margin-bottom:3px;">* ${nd.inner_thought} *</div>
+                <div style="font-size:13.5px;color:#ffffff;font-weight:600;line-height:1.42;text-shadow:0 1px 3px rgba(0,0,0,0.95);margin-bottom:8px;">"${nd.speaker_line || nd.dialogue || ''}"</div>
+                <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:6px;">${choicesHtml}</div>
+                <div style="display:flex;gap:6px;">
+                  <input type="text" id="wlVnFreeTextInput" onkeydown="if(event.key==='Enter')sendVnFreeText()" placeholder="Or type your own custom response to ${vn.short_name} (AI evaluates live)..." style="flex:1;background:rgba(15,23,42,0.62);border:1px solid rgba(196,181,253,0.45);color:#fff;">
+                  <button class="btn btn-blue" style="flex:0 0 auto;padding:5px 12px;" onclick="sendVnFreeText()">Speak ➤</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      }
+    }
+  }
+
+  // 6. Free-Roam Chauffeur Outings & Gift Shop
+  const frBanner = document.getElementById('wlActiveFreeroamBanner');
+  if (frBanner) {
+    const fr = ds.active_freeroam_session;
+    frBanner.innerHTML = `
+      <div style="background:rgba(6,95,70,0.32);border:1px solid #10b981;border-radius:10px;padding:8px 10px;">
+        <div style="font-size:11px;font-weight:800;color:#6ee7b7;margin-bottom:4px;">
+          🚗 ${fr ? `Active Outing: Driving ${fr.char_name} to ${fr.spot_name}` : `Complete / Simulate Free-Roam Chauffeur Outing with ${sel.short_name}`}
+        </div>
+        <div style="font-size:10px;color:#cbd5e1;margin-bottom:6px;">
+          Criteria: Arrive at the pinned GPS destination without vehicle crashes or Wanted Stars (Cap: ${sel.stage_freeroam_pts || 0}/${sel.stage_freeroam_cap || 75} ♥ in Stage ${sel.stage}).
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;">
+          <button class="btn btn-green" style="padding:4px 9px;font-size:10px;" onclick="act('dating_complete_freeroam',{char_id:'${sel.id}',grade:'S'})">🏆 S-Rank Smooth Chauffeur (+25 ♥)</button>
+          <button class="btn btn-blue" style="padding:4px 9px;font-size:10px;" onclick="act('dating_complete_freeroam',{char_id:'${sel.id}',grade:'A'})">✅ A-Rank Safe Arrival (+20 ♥)</button>
+          <button class="btn btn-red" style="padding:4px 9px;font-size:10px;" onclick="act('dating_complete_freeroam',{char_id:'${sel.id}',grade:'FAIL'})">💥 Crash / Wanted (0 ♥)</button>
+        </div>
+      </div>
+    `;
+  }
+
+  const spotsBox = document.getElementById('wlDateSpotsBox');
+  if (spotsBox) {
+    spotsBox.innerHTML = (sel.date_spots || []).map(sp => `
+      <div style="background:#0b1324;border:1px solid #263554;border-radius:10px;padding:7px 10px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+        <div>
+          <div style="font-size:12px;font-weight:800;color:#fde68a;">📍 ${sp.name}</div>
+          <div style="font-size:10.5px;color:#cbd5e1;margin-top:2px;">${sp.desc}</div>
+          <div style="font-size:9.5px;color:#94a3b8;margin-top:1px;">Coords: (${sp.coords[0]}, ${sp.coords[1]}, ${sp.coords[2]})</div>
+        </div>
+        <button class="btn btn-green" style="flex:0 0 auto;padding:5px 10px;font-size:11px;" onclick="act('dating_schedule_date',{char_id:'${sel.id}',spot_id:'${sp.id}'})">
+          🚗 Start Outing &amp; Pin GPS
+        </button>
+      </div>
+    `).join('');
+  }
+
+  const giftsBox = document.getElementById('wlGiftsBox');
+  if (giftsBox) {
+    giftsBox.innerHTML = gifts.map(gfItem => {
+      const isFav = (gfItem.favored_by || []).includes(sel.id);
+      const gain = Math.round(gfItem.base_affection * (isFav ? 1.4 : 1.0));
+      return `<div style="background:${isFav?'rgba(80,27,62,0.45)':'#0b1324'};border:1px solid ${isFav?'#f472b6':'#263554'};border-radius:10px;padding:7px 10px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+        <div>
+          <div style="font-size:12px;font-weight:800;color:#f8fafc;">
+            ${gfItem.icon} ${gfItem.name}
+            ${isFav ? `<span style="background:#be185d;color:#fff;font-size:9.5px;padding:1px 6px;border-radius:999px;margin-left:4px;">★ ${sel.short_name}'s Favorite!</span>` : ''}
+          </div>
+          <div style="font-size:10.5px;color:#cbd5e1;margin-top:2px;">${gfItem.desc}</div>
+          <div style="font-size:10px;color:#6ee7b7;margin-top:2px;font-weight:700;">Cost: $${gfItem.price} • Affection: +${gain} ♥</div>
+        </div>
+        <button class="btn btn-gold" style="flex:0 0 auto;padding:5px 10px;font-size:11px;" onclick="act('dating_send_gift',{char_id:'${sel.id}',gift_id:'${gfItem.id}'});setWaifuSubtab('chat');">
+          🎁 Send (-$${gfItem.price})
+        </button>
+      </div>`;
+    }).join('');
+  }
+
+  // 7. 3-Tier Hierarchical Memory Inspector (L1 Working / L2 Episodic / L3 On-Demand Archive) + 5-Layer Dossier
+  const tmBox = document.getElementById('wlTieredMemoryBox');
+  if (tmBox && ds.tiered_memory_preview) {
+    const tm = ds.tiered_memory_preview;
+    tmBox.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:5px;font-size:10px;">
+        <div style="background:#0b1324;border-left:3px solid #38bdf8;border-radius:6px;padding:6px 8px;">
+          <b style="color:#38bdf8;">Tier 1 (L1 Always-On Working Digest — Compact Context):</b>
+          <div style="color:#e2e8f0;margin-top:2px;white-space:pre-line;">${tm.l1_working_digest || ''}</div>
+        </div>
+        <div style="background:#0b1324;border-left:3px solid #f59e0b;border-radius:6px;padding:6px 8px;">
+          <b style="color:#fde68a;">Tier 2 (L2 Episodic Scenario &amp; Outing Summaries):</b>
+          <div style="color:#cbd5e1;margin-top:2px;white-space:pre-line;">${tm.l2_episodic_summary || 'Play VN Scenarios or Free-Roam Outings to build episodic memories.'}</div>
+        </div>
+        <div style="background:#0b1324;border-left:3px solid #c084fc;border-radius:6px;padding:6px 8px;">
+          <b style="color:#e9d5ff;">Tier 3 (L3 Deep Archive Keyword Recall — Triggered On-Demand: ${(tm.l3_hits_count || 0)} hits):</b>
+          <div style="color:#cbd5e1;margin-top:2px;white-space:pre-line;">${tm.l3_triggered_archive || 'Standby (only injected when your message mentions past quests, companions, or saved facts).'}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  const dosBox = document.getElementById('wlDossierBox');
+  if (dosBox) {
+    const stMatrix = sel.stage_persona_matrix || {};
+    const stageRows = [1, 2, 3, 4, 5].map(stNum => {
+      const isCurr = (stNum === sel.stage);
+      const txt = stMatrix[String(stNum)] || '';
+      return txt ? `<div style="padding:4px 7px;margin-bottom:3px;border-radius:6px;background:${isCurr?'rgba(244,114,182,0.18)':'#0b1324'};border:1px solid ${isCurr?sel.accent_color:'#263554'};font-size:10.5px;">
+        <b style="color:${isCurr?'#fde68a':'#94a3b8'};">${isCurr?'▶ ACTIVE ':''}</b><span style="color:#f1f5f9;">${txt}</span>
+      </div>` : '';
+    }).join('');
+    const dnaRows = (sel.speech_dna || []).map(d => `<div style="font-size:10.5px;color:#cbd5e1;margin-bottom:2px;">• ${d}</div>`).join('');
+    dosBox.innerHTML = `
+      <div style="margin-bottom:6px;"><b>Biography:</b> ${sel.bio || ''}</div>
+      <div style="margin-bottom:4px;">🔮 <b>Inner Channel:</b> <span style="color:#e9d5ff;font-weight:800;">${sel.inner_channel_label || '💭 Inner Thought'}</span></div>
+      <div style="margin-bottom:4px;">🕒 <b>Schedule:</b> <span style="color:#fde68a;">${sel.schedule_label || ''}</span></div>
+      <div style="margin-bottom:4px;">🎁 <b>Special Perk:</b> <span style="color:#6ee7b7;">${sel.perk_label || ''}</span></div>
+      <div style="margin-bottom:4px;">💗 <b>Likes:</b> ${(sel.likes || []).join(' • ')}</div>
+      <div style="margin-bottom:8px;">⚡ <b>Dislikes:</b> ${(sel.dislikes || []).join(' • ')}</div>
+      <div style="font-weight:800;color:#f9a8d4;margin-bottom:4px;">🎭 Layer 1: Stage-Gated Persona Matrix (Stage 1 → 5):</div>
+      <div style="margin-bottom:8px;">${stageRows}</div>
+      <div style="font-weight:800;color:#fde68a;margin-bottom:4px;">🗣️ Layer 2: Speech DNA &amp; Roleplay Guardrails:</div>
+      <div>${dnaRows}</div>
+    `;
+  }
+
+  const memCntEl = document.getElementById('wlMemCountBadge');
+  if (memCntEl) memCntEl.textContent = `${mems.length} notes saved`;
+  const memListBox = document.getElementById('wlMemoriesListBox');
+  if (memListBox) {
+    memListBox.innerHTML = mems.map(m => `
+      <div style="background:#0b1324;border:1px solid #334155;border-radius:8px;padding:5px 8px;display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:11px;">
+        <div>
+          <span style="background:#3b0764;color:#e9d5ff;font-size:9.5px;font-weight:800;padding:1px 6px;border-radius:999px;margin-right:5px;">${m.kind}</span>
+          <span style="color:#f1f5f9;">${m.text}</span>
+        </div>
+        <button class="pill" style="background:#7f1d1d;color:#fecaca;border:none;padding:2px 6px;font-size:9.5px;" onclick="act('dating_delete_memory',{char_id:'${sel.id}',mem_id:${m.id}})">✕</button>
+      </div>
+    `).join('') || '<div style="color:#94a3b8;font-size:11px;">No memories recorded yet. Chat with her to build memories!</div>';
+  }
+
+  // 8. Subtab 5: 15 Milestone CGs (M01..M15 for Hu Tao) + Canonical Visual Appearance + Completed Past Quests
+  const galCntEl = document.getElementById('wlGalleryCountBadge');
+  if (galCntEl) galCntEl.textContent = `${gallery.filter(p => p.unlocked).length}/${gallery.length} Unlocked`;
+  const galGrid = document.getElementById('wlGalleryGrid');
+  if (galGrid) {
+    galGrid.innerHTML = gallery.map(p => `
+      <div style="background:#0b1324;border:1.5px solid ${p.unlocked ? sel.accent_color : '#334155'};border-radius:12px;overflow:hidden;cursor:pointer;position:relative;"
+           onclick="openWaifuLightbox('${p.url}','${escapeJsStr(p.title)}','${escapeJsStr(p.char_name)}','${escapeJsStr(p.caption)}')">
+        <img src="${p.url}" alt="${p.title}" style="width:100%;height:150px;object-fit:cover;display:block;filter:${p.unlocked?'none':'brightness(0.72)'};">
+        <div style="position:absolute;top:5px;left:5px;background:rgba(9,13,24,0.86);color:#fde68a;font-size:8.5px;font-weight:800;padding:2px 6px;border-radius:999px;border:1px solid ${sel.accent_color};">
+          M${String(p.milestone_num || 1).padStart(2,'0')} • ${p.req_affection || 60}♥ • ${p.spice_tier || 'Stage ' + p.stage}
+        </div>
+        <div style="padding:6px 8px;">
+          <div style="font-size:10.5px;font-weight:800;color:#fde68a;">${p.title}</div>
+          <div style="font-size:9.5px;color:#cbd5e1;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">"${p.caption}"</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  const visBadge = document.getElementById('wlVisualSkinBadge');
+  if (visBadge) visBadge.textContent = `Ped #${sel.ped_id} • ${sel.model_name} (Skin #${sel.skin_number})`;
+  const visBox = document.getElementById('wlVisualBox');
+  if (visBox) {
+    const va = sel.visual_appearance;
+    if (typeof va === 'string') {
+      visBox.innerHTML = `<div style="color:#f8fafc;">👗 ${va}</div>`;
+    } else if (va && typeof va === 'object') {
+      visBox.innerHTML = `
+        <div style="margin-bottom:5px;">👗 <b>Outfit in GTA SA:</b> <span style="color:#fde68a;">${va.outfit_name || ''}</span></div>
+        <div style="margin-bottom:5px;">💇‍♀️ <b>Hair &amp; Eyes:</b> ${va.hair_and_eyes || ''}</div>
+        <div style="margin-bottom:5px;">🧵 <b>Attire Details:</b> ${va.attire_details || ''}</div>
+        <div>✨ <b>Signature Visual Motifs:</b> <span style="color:#a7f3d0;">${va.signature_motifs || ''}</span></div>
+      `;
+    }
+  }
+
+  const questsBox = document.getElementById('wlQuestsBox');
+  if (questsBox) {
+    questsBox.innerHTML = (sel.quests_and_events || []).map(q => `
+      <div style="background:#0b1324;border:1px solid #263554;border-radius:10px;padding:7px 10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
+          <b style="font-size:11.5px;color:#fde68a;">⚔️ ${q.title}</b>
+          ${q.type ? `<span style="background:#1e293b;color:#38bdf8;font-size:9.5px;font-weight:800;padding:1px 7px;border-radius:999px;">${q.type}</span>` : ''}
+        </div>
+        <div style="font-size:11px;color:#cbd5e1;margin-top:3px;line-height:1.42;">${q.summary}</div>
+      </div>
+    `).join('');
+  }
+
+  const relBox = document.getElementById('wlRelationsBox');
+  if (relBox) {
+    relBox.innerHTML = (sel.relationships || []).map(r => `
+      <div style="background:#0b1324;border:1px solid #263554;border-radius:9px;padding:6px 9px;font-size:11px;line-height:1.42;">
+        <b style="color:#93c5fd;">🤝 ${r.name || r.person}:</b> <span style="color:#e2e8f0;">${r.role || r.relation}</span>
+      </div>
+    `).join('');
+  }
+
+  const quotesBox = document.getElementById('wlQuotesBox');
+  if (quotesBox) {
+    const quotesHtml = (sel.canonical_quotes || []).map(qt => `<div style="margin-bottom:5px;padding:5px 8px;background:#0b1324;border-left:3px solid ${sel.accent_color};border-radius:6px;font-style:italic;color:#f8fafc;">"${qt}"</div>`).join('');
+    const tropesHtml = (sel.fanfic_tropes || []).map(tr => `<div style="margin-bottom:3px;color:#fbcfe8;">• ${tr}</div>`).join('');
+    quotesBox.innerHTML = `
+      <div style="font-weight:800;color:#fde68a;margin-bottom:4px;">🎙️ Canonical Voice-Overs &amp; Serenitea Pot Lines:</div>
+      ${quotesHtml}
+      <div style="font-weight:800;color:#f472b6;margin:8px 0 4px 0;">💞 Popular Aether Romance &amp; Fanfic Tropes:</div>
+      ${tropesHtml}
+    `;
+  }
+}
+
+
+function sendContactDmInput() {
+  const inp = document.getElementById('ctDmInput');
+  if (!inp) return;
+  const txt = inp.value.trim();
+  if (!txt) return;
+  inp.value = '';
+  act('contacts_send_dm', {text: txt});
+}
+
+function renderContactsApp(ct) {
+  if (!ct) return;
+  const mTotal = Math.max(0, (ct.total_contacts || 20) - 6);
+  const unBadge = document.getElementById('ctUnlockBadge');
+  if (unBadge) unBadge.textContent = `${(ct.unlocked_mondstadt_count || 0) + 6}/${ct.total_contacts || 20} Unlocked (${ct.unlocked_mondstadt_count || 0}/${mTotal} Mondstadt)`;
+  const tb0 = document.getElementById('ctTabBtn-0');
+  const tb1 = document.getElementById('ctTabBtn-1');
+  if (tb0) tb0.textContent = `All (${ct.total_contacts || 20})`;
+  if (tb1) tb1.textContent = `🍃 Mondstadt (${mTotal})`;
+  [0, 1, 2].forEach(i => {
+    const b = document.getElementById('ctTabBtn-' + i);
+    if (b) b.classList.toggle('active', i === (ct.tab_idx || 0));
+  });
+
+  const listEl = document.getElementById('ctListBox');
+  const items = ct.filtered_contacts || [];
+  const sel = ct.selected || items[0] || null;
+  if (listEl) {
+    listEl.innerHTML = items.map(it => {
+      const isSel = sel && sel.key === it.key;
+      const bCol = isSel ? '#38bdf8' : (it.unlocked ? '#1e3a5f' : '#334155');
+      const bg = isSel ? 'rgba(14,116,144,0.28)' : '#091224';
+      const avatarSrc = it.kind === 'mondstadt' ? `/assets/${it.icon_tex}.png` : `/assets/${it.icon_tex}.png`;
+      return `<div onclick="act('contacts_select',{key:'${it.key}',open_chat:true})" style="cursor:pointer;background:${bg};border:1.5px solid ${bCol};border-radius:10px;padding:7px 9px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+          <img src="${avatarSrc}" alt="${it.name}" style="width:36px;height:36px;border-radius:50%;border:1.5px solid ${it.accent};object-fit:cover;filter:${it.unlocked?'none':'grayscale(0.75) brightness(0.7)'};">
+          <div style="min-width:0;">
+            <div style="font-size:12px;font-weight:800;color:${it.unlocked?'#f8fafc':'#94a3b8'};">${it.unlocked ? '🟢' : '🔒'} ${it.name} <span style="font-size:10px;color:#93c5fd;font-weight:600;">• ${it.title}</span></div>
+            <div style="font-size:10.5px;color:#cbd5e1;">📍 ${it.zone} (${it.dist_str}) • <b style="color:${it.unlocked?'#6ee7b7':'#fbbf24'};">${it.status_badge}</b></div>
+          </div>
+        </div>
+        <button class="pill" onclick="event.stopPropagation();act('contacts_pin_gps',{key:'${it.key}'})" title="Pin GPS">📍 GPS</button>
+      </div>`;
+    }).join('');
+  }
+
+  const hdrEl = document.getElementById('ctSelHeader');
+  const bodyEl = document.getElementById('ctChatBody');
+  if (!sel || !bodyEl) return;
+  if (hdrEl) hdrEl.textContent = `💬 ${sel.name} — ${sel.title}`;
+
+  if (!sel.unlocked) {
+    bodyEl.innerHTML = `<div style="background:#0b1324;border:1px dashed #f59e0b;border-radius:10px;padding:12px;text-align:center;">
+      <div style="font-size:13px;font-weight:800;color:#fde68a;margin-bottom:4px;">🔒 Social Link Not Yet Unlocked</div>
+      <div style="font-size:11.5px;color:#cbd5e1;line-height:1.45;margin-bottom:10px;">
+        Travel to <b>${sel.zone}</b> (${sel.dist_str}) and press <b>[E]</b> to greet <b>${sel.name}</b> in person first! Once you've met face-to-face, remote phone messaging unlocks permanently.
+      </div>
+      <button class="btn btn-gold" onclick="act('contacts_pin_gps',{key:'${sel.key}'})">📍 Pin Red 'T' GPS Waypoint (${sel.dist_str})</button>
+    </div>`;
+    return;
+  }
+
+  let histHtml = '';
+  if (sel.kind === 'mondstadt') {
+    const turns = sel.history || [];
+    histHtml = turns.length ? turns.map(t => `
+      <div style="align-self:flex-end;background:#0369a1;color:#f8fafc;padding:6px 10px;border-radius:10px 10px 2px 10px;max-width:85%;font-size:11.5px;"><b>Aether:</b> ${t.user}</div>
+      <div style="align-self:flex-start;background:#0f172a;border:1px solid #334155;color:#e2e8f0;padding:7px 10px;border-radius:10px 10px 10px 2px;max-width:90%;font-size:11.5px;line-height:1.42;"><b style="color:#fde68a;">${sel.name}:</b> ${t.reply}</div>
+    `).join('') : `<div style="background:#0f172a;border:1px solid #334155;color:#e2e8f0;padding:8px 10px;border-radius:10px;font-size:11.5px;"><b style="color:#fde68a;">${sel.name}:</b> ${sel.last_reply}</div>`;
+  } else {
+    histHtml = (sel.history || []).map(m => m.role === 'user'
+      ? `<div style="align-self:flex-end;background:#9d174d;color:#fff;padding:6px 10px;border-radius:10px 10px 2px 10px;max-width:85%;font-size:11.5px;"><b>Aether:</b> ${m.content}</div>`
+      : `<div style="align-self:flex-start;background:#0f172a;border:1px solid #4c1d95;color:#fce7f3;padding:7px 10px;border-radius:10px 10px 10px 2px;max-width:90%;font-size:11.5px;"><b style="color:#f9a8d4;">${sel.name}:</b> ${m.content}</div>`
+    ).join('');
+  }
+
+  const choicesHtml = (sel.choices || []).map(c =>
+    `<button class="pill" style="text-align:left;border-color:#38bdf8;color:#e0f2fe;" onclick="act('contacts_send_dm',{key:'${sel.key}',choice_id:'${escapeJsStr(c.id)}'})">➤ ${c.label}</button>`
+  ).join('');
+
+  bodyEl.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;background:#081122;border:1px solid #1e3a5f;border-radius:10px;padding:8px;margin-bottom:8px;">
+      <img src="${sel.sprite_url}" alt="${sel.name}" style="width:64px;height:64px;object-fit:contain;background:radial-gradient(circle,rgba(56,189,248,0.22),transparent 70%);border-radius:8px;">
+      <div style="font-size:11px;color:#cbd5e1;line-height:1.4;">
+        <div><b style="color:#fde68a;">Mood:</b> ${sel.mood_label || 'Calm'} • <b style="color:#6ee7b7;">Memories:</b> ${sel.memories_count || 0} notes</div>
+        ${sel.pending ? `<div style="color:#38bdf8;font-weight:800;margin-top:2px;">⏳ ${sel.name} is typing a reply...</div>` : ''}
+        ${sel.last_error ? `<div style="color:#fca5a5;margin-top:2px;">⚠️ ${sel.last_error}</div>` : ''}
+      </div>
+    </div>
+    <div style="max-height:210px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:8px;padding-right:3px;">${histHtml}</div>
+    <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px;">${choicesHtml}</div>
+    <div style="display:flex;gap:5px;">
+      <input type="text" id="ctDmInput" onkeydown="if(event.key==='Enter')sendContactDmInput()" placeholder="Message ${sel.name} remotely..." style="flex:1;">
+      <button class="btn btn-blue" style="flex:0 0 auto;padding:6px 12px;" onclick="sendContactDmInput()">Send ➤</button>
+    </div>
+  `;
 }
 
 async function pollState() {
