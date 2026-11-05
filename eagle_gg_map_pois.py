@@ -1416,9 +1416,9 @@ CURATED_GG_MAP_POIS = [{'id': 'lm_ls_tower',
   'name': '[S&S] Bo Bien Gaviota (Bayside North)',
   'name_vi': '🌊 [Map Mở Rộng] Bờ Biển Gaviota Phía Bắc Vịnh SF',
   'region': 'Gaviota',
-  'x': -2308.6,
-  'y': 1971.9,
-  'z': 2.1,
+  'x': -2562.0,
+  'y': 2361.0,
+  'z': 6.5,
   'desc': 'Cung đường ven biển Gaviota ngay phía Bắc cầu treo Gant Bridge.'},
  {'id': 'lm_pera_loca',
   'cat': 'LANDMARKS',
@@ -1659,9 +1659,9 @@ CURATED_GG_MAP_POIS = [{'id': 'lm_ls_tower',
   'name': '[Cruise Spot] Bo Vinh Bayside Ngam Cau Do',
   'name_vi': '🌉 [Cruise Spot] Bến Thuyền Bayside Ngắm Cầu Cổng Vàng Gant Bridge',
   'region': 'Bayside',
-  'x': -2378.5,
-  'y': 2215.1,
-  'z': 11.9,
+  'x': -2455.0,
+  'y': 2230.0,
+  'z': 3.8,
   'desc': 'Góc nhìn toàn cảnh cây cầu treo đỏ Gant Bridge ẩn hiện trong sương sớm.'},
  {'id': 'wb_mulholland_villa_pool',
   'cat': 'WIBU_WORLD',
@@ -6224,11 +6224,12 @@ def format_distance(dist_m: float) -> str:
 def get_pois_for_category(cat_code: str, player_pos: tuple = (2495.0, -1687.0, 13.5), lang: str = "en") -> list[dict]:
     """
     Returns POIs in `cat_code` sorted nearest-first from `player_pos`, localized in `lang` ('en' default or 'vi').
+    Supports both primary `p["cat"]` and multi-category `p.get("cats", ())`.
     """
     px, py, _pz = player_pos
     results = []
     for p in CURATED_GG_MAP_POIS:
-        if cat_code != "ALL" and p["cat"] != cat_code:
+        if cat_code != "ALL" and p["cat"] != cat_code and cat_code not in p.get("cats", ()):
             continue
         dx = float(p["x"]) - float(px)
         dy = float(p["y"]) - float(py)
@@ -6241,3 +6242,657 @@ def get_pois_for_category(cat_code: str, player_pos: tuple = (2495.0, -1687.0, 1
 
     results.sort(key=lambda item: item["dist_m"])
     return results
+
+
+# --- 1. Update WIBU-01 Urban Redesign (2026-10-25) Coordinates & Add 8 New WIBU-01 + 6 Bridge/Dublin POIs ---
+_WIBU01_COORD_UPDATES = {
+    "wb_mondstadt_cathedral": {
+        "x": -4445.0, "y": -2933.0, "z": 57.2,
+        "cats": ["WIBU_WORLD", "LANDMARKS"],
+    },
+    "wb_wibu01_bridge_north": {
+        "cats": ["WIBU_WORLD", "LANDMARKS"],
+    },
+    "wb_wibu01_bridge_citadel": {
+        "cats": ["WIBU_WORLD", "LANDMARKS"],
+    },
+    "wb_wibu01_akihabara": {
+        "x": -1390.4, "y": -4565.0, "z": 24.3,
+        "cats": ["WIBU_WORLD", "LANDMARKS", "SHOPS_STYLE"],
+    },
+    "wb_wibu01_tokyo_tower": {
+        "x": -1291.0, "y": -4745.0, "z": 24.4,
+        "cats": ["WIBU_WORLD", "LANDMARKS"],
+        "name": "[WIBU-01] Thap Tokyo & Quang Truong Dong",
+        "name_vi": "🗼 [WIBU-01] Quảng Trường Đông & Tháp Truyền Hình Tokyo (TorreTokyo 333m)",
+        "desc": "Tháp truyền hình Tokyo đỏ-trắng vươn cao 333m trên nền quảng trường phía Đông phố điện tử Akihabara (tâm tháp tại -1255, -4820).",
+    },
+    "wb_wibu01_castle_kawaii": {
+        "x": -1465.0, "y": -4745.0, "z": 25.3,
+        "cats": ["WIBU_WORLD", "LANDMARKS"],
+        "name": "[WIBU-01] Lau Dai Co Nhat Ban (Doi Tay)",
+        "name_vi": "🏯 [WIBU-01] Lâu Đài Cổ Nhật Bản Trên Đồi Tây & Vườn Hoa Anh Đào",
+        "desc": "Quần thể Lâu Đài Cổ Nhật Bản uy nghiêm ngự trên nền đá Đồi Tây đảo WIBU-01, bao quanh bởi rừng Hoa Anh Đào hồng rực.",
+    },
+    "wb_wibu01_kerorin_capital": {
+        "x": -1390.4, "y": -4900.7, "z": 23.3,
+        "cats": ["WIBU_WORLD", "LANDMARKS"],
+        "name": "[WIBU-01] Cong Bac Thu Phu Kerorin Capital",
+        "name_vi": "🏙️ [WIBU-01] Cổng Chào Thủ Phủ Đô Thị Kerorin (ケロリン町) & Vòng Xuyến",
+        "desc": "Cổng chào ケロリン町 (Kerorin-cho) và vòng xuyến trung tâm dẫn vào quần thể đô thị Nhật Bản hiện đại Kerorin.",
+    },
+}
+for _p in CURATED_GG_MAP_POIS:
+    if _p["id"] in _WIBU01_COORD_UPDATES:
+        _p.update(_WIBU01_COORD_UPDATES[_p["id"]])
+
+_WIBU01_AND_BRIDGES_EXTRA_POIS = [
+    {
+        "id": "wb_wibu01_toll_south",
+        "cat": "WIBU_WORLD",
+        "cats": ["WIBU_WORLD", "LANDMARKS"],
+        "name": "[WIBU-01] Tram Thu Phi Nam Seto Ohashi",
+        "name_vi": "⛩️ [WIBU-01] Trạm Thu Phí Nam Cầu Seto Ohashi & Cửa Ngõ Đảo Nhật Bản",
+        "name_en": "[WIBU-01] Seto Ohashi South Toll & Gateway",
+        "name_en_disp": "⛩️ [WIBU-01] Seto Ohashi South Toll Plaza & Akihabara Gateway",
+        "region": "Wibu Island [MKLAS]",
+        "x": -1390.4, "y": -4525.0, "z": 24.4,
+        "desc": "Trạm thu phí phía Nam của Đại cầu Seto Ohashi mở ra đại lộ Chuo-dori tiến thẳng vào trung tâm Akihabara.",
+        "desc_en": "Southern toll plaza of the Seto Ohashi Suspension Bridge opening onto Akihabara's Chuo-dori avenue.",
+    },
+    {
+        "id": "wb_wibu01_ishimaru_station",
+        "cat": "WIBU_WORLD",
+        "cats": ["WIBU_WORLD", "SHOPS_STYLE", "LANDMARKS"],
+        "name": "[WIBU-01] Toa Ishimaru Ekimae & Cau JR Sobu",
+        "name_vi": "🚆 [WIBU-01] Trung Tâm Điện Tử Ishimaru Ekimae & Cầu Vượt Tàu JR Sobu Line",
+        "name_en": "[WIBU-01] Ishimaru Ekimae & JR Sobu Overpass",
+        "name_en_disp": "🚆 [WIBU-01] Ishimaru Ekimae Electronics & JR Sobu Rail Overpass",
+        "region": "Wibu Island [MKLAS]",
+        "x": -1390.4, "y": -4663.4, "z": 24.3,
+        "desc": "Giao lộ sầm uất bậc nhất Akihabara dưới chân cầu vượt đường sắt xanh lá JR Sobu Line và tòa nhà điện tử Ishimaru.",
+        "desc_en": "Bustling Akihabara intersection beneath the green JR Sobu railway overpass and Ishimaru electronics tower.",
+    },
+    {
+        "id": "wb_wibu01_kawaiiboutique",
+        "cat": "WIBU_WORLD",
+        "cats": ["WIBU_WORLD", "SHOPS_STYLE"],
+        "name": "[WIBU-01] Tiem Thoi Trang Kawaiiboutique",
+        "name_vi": "🎀 [WIBU-01] Cửa Hàng Thời Trang Anime Kawaiiboutique",
+        "name_en": "[WIBU-01] Kawaiiboutique Anime Fashion Shop",
+        "name_en_disp": "🎀 [WIBU-01] Kawaiiboutique Harajuku & Anime Fashion Store",
+        "region": "Wibu Island [MKLAS]",
+        "x": -1418.0, "y": -4762.0, "z": 23.3,
+        "desc": "Boutique thời trang phong cách Harajuku / Kawaii màu hồng nổi bật ngay giao lộ giữa Akihabara và Đại lộ Sakura.",
+        "desc_en": "Pink Harajuku/Kawaii fashion boutique at the junction of Akihabara and Central Sakura Boulevard.",
+    },
+    {
+        "id": "wb_wibu01_sakura_blvd",
+        "cat": "WIBU_WORLD",
+        "cats": ["WIBU_WORLD", "LANDMARKS"],
+        "name": "[WIBU-01] Dai Lo Hoa Anh Dao Trung Tam",
+        "name_vi": "🌸 [WIBU-01] Đại Lộ Hoa Anh Đào Trung Tâm (Sakura Boulevard)",
+        "name_en": "[WIBU-01] Central Sakura Blossom Boulevard",
+        "name_en_disp": "🌸 [WIBU-01] Central Cherry Blossom Avenue (Sakura Boulevard)",
+        "region": "Wibu Island [MKLAS]",
+        "x": -1390.4, "y": -4800.0, "z": 23.3,
+        "desc": "Trục đại lộ trung tâm thẳng tắp nối liền Akihabara với Thủ phủ Kerorin, hai bên rợp bóng Hoa Anh Đào.",
+        "desc_en": "Grand cherry-blossom-lined central avenue linking Akihabara with Kerorin Capital.",
+    },
+    {
+        "id": "wb_wibu01_kerorin_south",
+        "cat": "WIBU_WORLD",
+        "cats": ["WIBU_WORLD", "FOOD_CLUB", "SHOPS_STYLE"],
+        "name": "[WIBU-01] Pho Thuong Mai Nam Kerorin",
+        "name_vi": "🏮 [WIBU-01] Khu Phố Thương Mại & Ẩm Thực Nam Kerorin",
+        "name_en": "[WIBU-01] South Kerorin Commercial Avenue",
+        "name_en_disp": "🏮 [WIBU-01] South Kerorin Shopping & Dining District",
+        "region": "Wibu Island [MKLAS]",
+        "x": -1458.1, "y": -5048.6, "z": 11.5,
+        "desc": "Tuyến phố thương mại sầm uất phía Nam Kerorin nối liền sang Đặc khu đô thị ZERO.",
+        "desc_en": "Lively commercial street in southern Kerorin leading toward the ZERO metropolitan district.",
+    },
+    {
+        "id": "wb_wibu01_zero_east_gate",
+        "cat": "WIBU_WORLD",
+        "cats": ["WIBU_WORLD", "LANDMARKS"],
+        "name": "[WIBU-01] Dac Khu Do Thi ZERO (Cong Dong)",
+        "name_vi": "🌆 [WIBU-01] Đặc Khu Đô Thị Hiện Đại ZERO — Cửa Ngõ Phía Đông",
+        "name_en": "[WIBU-01] ZERO Metropolis East Gateway",
+        "name_en_disp": "🌆 [WIBU-01] ZERO Modern Metropolis — Eastern Gateway",
+        "region": "Wibu Island [MKLAS]",
+        "x": -1555.6, "y": -5138.6, "z": 23.3,
+        "desc": "Cửa ngõ phía Đông bước vào Đặc khu Đô thị ZERO (26 phân khu cao ốc Nhật Bản hiện đại phía Tây Nam đảo WIBU-01).",
+        "desc_en": "Eastern gateway into the 26-block ZERO high-rise metropolitan district on southwestern WIBU-01.",
+    },
+    {
+        "id": "wb_wibu01_zero_plaza",
+        "cat": "WIBU_WORLD",
+        "cats": ["WIBU_WORLD", "LANDMARKS"],
+        "name": "[WIBU-01] Quang Truong Trung Tam ZERO",
+        "name_vi": "🏙️ [WIBU-01] Quảng Trường Trung Tâm & Quần Thể Cao Ốc Đặc Khu ZERO",
+        "name_en": "[WIBU-01] ZERO Central Skyscraper Plaza",
+        "name_en_disp": "🏙️ [WIBU-01] ZERO Central Plaza & High-Rise Towers",
+        "region": "Wibu Island [MKLAS]",
+        "x": -1617.8, "y": -5151.3, "z": 28.5,
+        "desc": "Trái tim của Đặc khu Đô thị ZERO với các tòa tháp văn phòng kính, đại lộ nhiều làn và quảng trường trung tâm.",
+        "desc_en": "Heart of the ZERO metropolitan district featuring glass office towers and wide urban avenues.",
+    },
+    {
+        "id": "wb_wibu01_zero_west_harbor",
+        "cat": "WIBU_WORLD",
+        "cats": ["WIBU_WORLD", "LANDMARKS"],
+        "name": "[WIBU-01] Dai Lo Vien Tay & Cang Bien ZERO",
+        "name_vi": "⚓ [WIBU-01] Đại Lộ Viễn Tây & Bến Cảng Nam Đặc Khu ZERO",
+        "name_en": "[WIBU-01] ZERO West Oceanfront Boulevard",
+        "name_en_disp": "⚓ [WIBU-01] ZERO Far-West Oceanfront & Southern Harbor",
+        "region": "Wibu Island [MKLAS]",
+        "x": -1710.0, "y": -5210.0, "z": 23.3,
+        "desc": "Điểm cực Tây Nam của quần đảo Nhật Bản WIBU-01 nhìn ra đại dương phía Nam.",
+        "desc_en": "Southwestern oceanfront promenade of WIBU-01 Japanese Island overlooking the southern sea.",
+    },
+    {
+        "id": "lm_dublin_island",
+        "cat": "LANDMARKS",
+        "cats": ["LANDMARKS", "WIBU_WORLD"],
+        "name": "[WIBU-04] Quan Dao Dublin (Dong Bac Map)",
+        "name_vi": "🏝️ [WIBU-04] Trung Tâm Quần Đảo Dublin (Đông Bắc Bản Đồ)",
+        "name_en": "[WIBU-04] Dublin Island Metropolis (NE Map)",
+        "name_en_disp": "🏝️ [WIBU-04] Dublin Archipelago Urban Center (Northeast Map)",
+        "region": "Dublin Island [S&S]",
+        "x": 16850.0, "y": 11450.0, "z": 24.0,
+        "desc": "Quần đảo đô thị Dublin rộng lớn ở vùng biển Đông Bắc, kết nối trực tiếp với Bullworth và Upstate Liberty qua Cầu Cao Tốc #3A và #3B.",
+        "desc_en": "Expansive northeastern island city connected to Bullworth and Upstate Liberty via Highway Bridges #3A and #3B.",
+    },
+    {
+        "id": "lm_bridge_br1_carcer_windy",
+        "cat": "LANDMARKS",
+        "cats": ["LANDMARKS"],
+        "name": "[Cau Cao Toc #1] Tay Carcer <-> Windy Bay",
+        "name_vi": "🌉 [Cầu Cao Tốc #1] Đại Cầu Vượt Biển Tây Carcer <-> Chicago / Windy Bay",
+        "name_en": "[Highway Bridge #1] West Carcer <-> Windy Bay",
+        "name_en_disp": "🌉 [Highway Bridge #1] West Carcer <-> Chicago / Windy Bay Sea Bridge",
+        "region": "Carcer <-> Windy Bay",
+        "x": 8786.8, "y": 9625.4, "z": 41.9,
+        "desc": "Tuyến cầu cao tốc vượt biển dài 1,7km nối liền Tây Carcer City với vùng vịnh Windy Bay và Chicago.",
+        "desc_en": "1.7km trans-ocean highway bridge connecting West Carcer City with Windy Bay and Chicago.",
+    },
+    {
+        "id": "lm_bridge_br2_carcer_bullworth",
+        "cat": "LANDMARKS",
+        "cats": ["LANDMARKS"],
+        "name": "[Cau Cao Toc #2] Dong Carcer <-> Bullworth",
+        "name_vi": "🌉 [Cầu Cao Tốc #2] Đại Cầu Vượt Biển Đông Carcer <-> Nam Bullworth",
+        "name_en": "[Highway Bridge #2] East Carcer <-> Bullworth",
+        "name_en_disp": "🌉 [Highway Bridge #2] East Carcer <-> South Bullworth Sea Bridge",
+        "region": "Carcer <-> Bullworth",
+        "x": 11363.0, "y": 10502.6, "z": 19.5,
+        "desc": "Tuyến cầu cao tốc vượt biển dài 2,8km nối liền khu công nghiệp Đông Carcer với học viện Bullworth.",
+        "desc_en": "2.8km highway bridge linking East Carcer Industrial District with Bullworth Town.",
+    },
+    {
+        "id": "lm_bridge_br3a_bullworth_dublin",
+        "cat": "LANDMARKS",
+        "cats": ["LANDMARKS"],
+        "name": "[Cau Cao Toc #3A] Bullworth <-> Tay Bac Dublin",
+        "name_vi": "🌉 [Cầu Cao Tốc #3A] Cầu Vượt Biển Đông Bắc Bullworth <-> Tây Bắc Đảo Dublin",
+        "name_en": "[Highway Bridge #3A] Bullworth <-> NW Dublin",
+        "name_en_disp": "🌉 [Highway Bridge #3A] NE Bullworth <-> NW Dublin Island Bridge",
+        "region": "Bullworth <-> Dublin",
+        "x": 14043.9, "y": 11436.4, "z": 4.5,
+        "desc": "Cầu vượt biển phía Bắc dẫn từ thị trấn Bullworth sang thẳng Quần đảo Dublin (WIBU-04).",
+        "desc_en": "Northern sea bridge leading from Bullworth directly onto Dublin Island (WIBU-04).",
+    },
+    {
+        "id": "lm_bridge_br3b_liberty_dublin",
+        "cat": "LANDMARKS",
+        "cats": ["LANDMARKS"],
+        "name": "[Cau Cao Toc #3B] Deo Upstate <-> Tay Nam Dublin",
+        "name_vi": "🌉 [Cầu Cao Tốc #3B] Cầu Cao Tốc Đèo Upstate Liberty <-> Tây Nam Đảo Dublin",
+        "name_en": "[Highway Bridge #3B] Upstate LC <-> SW Dublin",
+        "name_en_disp": "🌉 [Highway Bridge #3B] Upstate Liberty Pass <-> SW Dublin Island",
+        "region": "Upstate LC <-> Dublin",
+        "x": 15977.9, "y": 9958.0, "z": 140.8,
+        "desc": "Cầu cao tốc vượt đèo từ vùng núi Upstate Liberty xuống bờ Tây Nam Quần đảo Dublin.",
+        "desc_en": "Highland mountain viaduct descending from Upstate Liberty to southwestern Dublin Island.",
+    },
+    {
+        "id": "lm_bridge_br4_ls_peraloca",
+        "cat": "LANDMARKS",
+        "cats": ["LANDMARKS"],
+        "name": "[Cau Cao Toc #4] Cang Ocean Docks <-> Pera Loca",
+        "name_vi": "🌉 [Cầu Cao Tốc #4] Đại Cầu Nam Los Santos (Ocean Docks) <-> Đảo Pera Loca",
+        "name_en": "[Highway Bridge #4] LS Ocean Docks <-> Pera Loca",
+        "name_en_disp": "🌉 [Highway Bridge #4] South LS Ocean Docks <-> Pera Loca Island",
+        "region": "Los Santos <-> Pera Loca",
+        "x": 2326.0, "y": -2663.0, "z": 12.0,
+        "desc": "Cầu cao tốc vượt biển phía Nam nối cảng Ocean Docks (Los Santos) ra thẳng đảo nghỉ dưỡng Pera Loca (WIBU-02).",
+        "desc_en": "Southern ocean highway bridge connecting Los Santos Ocean Docks to Pera Loca Island (WIBU-02).",
+    },
+]
+
+for _ep in _WIBU01_AND_BRIDGES_EXTRA_POIS:
+    CURATED_GG_MAP_POIS.append({
+        "id": _ep["id"],
+        "cat": _ep["cat"],
+        "cats": _ep["cats"],
+        "name": _ep["name"],
+        "name_vi": _ep["name_vi"],
+        "region": _ep["region"],
+        "x": float(_ep["x"]),
+        "y": float(_ep["y"]),
+        "z": float(_ep["z"]),
+        "desc": _ep["desc"],
+    })
+    _POI_EN_BY_ID[_ep["id"]] = (_ep["name_en"], _ep["name_en_disp"], _ep["desc_en"])
+
+
+# --- 2. Mondstadt M0 + M1 + M2 Unified Campaign POIs (63 POIs with clean ASCII HUD & multi-tab categories) ---
+MONDSTADT_CAMPAIGN_POIS = [
+    {"name_ascii": "[Mondstadt M0] Cong Chinh Thanh Mondstadt", "name_en": "[Mondstadt M0] Mondstadt City Main Gate", "name_vi": "🍃 [Mondstadt M0] Cổng Chính Thành Mondstadt (City Main Gate)", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -4160.0, "y": -3056.8, "z": 7.2, "region": "Mondstadt M0"},
+    {"name_ascii": "[Mondstadt M0] Quang Truong Dai Phun Nuoc", "name_en": "[Mondstadt M0] Lower Fountain Plaza", "name_vi": "⛲ [Mondstadt M0] Quảng Trường Đài Phun Nước Trung Tâm (Lower Plaza)", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -4239.0, "y": -3020.0, "z": 13.1, "region": "Mondstadt M0"},
+    {"name_ascii": "[Mondstadt M0] Tru So Doi Ky Si Tay Phong", "name_en": "[Mondstadt M0] Knights of Favonius HQ", "name_vi": "🛡️ [Mondstadt M0] Trụ Sở Đội Kỵ Sĩ Tây Phong (Knights of Favonius HQ)", "cats": ["WIBU_WORLD", "LANDMARKS", "SAFEHOUSE_INT"], "x": -4371.0, "y": -3018.0, "z": 33.8, "region": "Mondstadt M0"},
+    {"name_ascii": "[Mondstadt M0] Quang Truong Tuong Phong Than", "name_en": "[Mondstadt M0] Barbatos Anemo Archon Plaza", "name_vi": "🗽 [Mondstadt M0] Quảng Trường Đại Tượng Phong Thần Barbatos", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -4378.0, "y": -2948.0, "z": 48.5, "region": "Mondstadt M0"},
+    {"name_ascii": "[Mondstadt M0] Dai Giao Duong Tay Phong", "name_en": "[Mondstadt M0] Favonius Grand Cathedral", "name_vi": "⛪ [Mondstadt M0] Đại Giáo Đường Tây Phong (Favonius Cathedral)", "cats": ["WIBU_WORLD", "LANDMARKS", "SAFEHOUSE_INT"], "x": -4445.0, "y": -2933.0, "z": 57.2, "region": "Mondstadt M0"},
+    {"name_ascii": "[Mondstadt M0] Cau Da Mondstadt & Timmie", "name_en": "[Mondstadt M0] Stone Bridge & Timmie's Pigeons", "name_vi": "🌉 [Mondstadt M0] Cầu Đá Cổng Thành Mondstadt & Hiệp Hội Mạo Hiểm Đầu Cầu", "cats": ["WIBU_WORLD", "LANDMARKS", "SHOPS_STYLE"], "x": -4084.8, "y": -3076.0, "z": 6.6, "region": "Mondstadt M0"},
+    {"name_ascii": "[Mondstadt M2] Dai Cau Vuot Bien Trung Tam", "name_en": "[Mondstadt M2] Central Trans-Ocean Viaduct", "name_vi": "🌉 [Mondstadt M2] Đại Cầu Vượt Biển Trung Tâm (Falcon Coast <-> Whetstone)", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -3206.0, "y": -3272.0, "z": 13.2, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Cau Go Vuot Bien Dao La Hoan", "name_en": "[Mondstadt M2] Cape Oath Timber Ocean Bridge", "name_vi": "🌉 [Mondstadt M2] Cầu Gỗ Vượt Biển Ra Đảo La Hoàn (Route 21 Ocean Bridge)", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -3030.0, "y": -3790.0, "z": 47.22, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Vach Da Hai Sao (Starsnatch)", "name_en": "[Mondstadt M2] Starsnatch Cliff & Anemo Statue", "name_vi": "⛰️ [Mondstadt M2] Vách Đá Hái Sao (Starsnatch Cliff) & Tượng Phong Thần", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -3326.0, "y": -2520.0, "z": 46.07, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Den Ngan Gio Dong (Ruins)", "name_en": "[Mondstadt M2] Thousand Winds Temple East", "name_vi": "🏛️ [Mondstadt M2] Đền Ngàn Gió Đông (Thousand Winds Temple East)", "cats": ["WIBU_WORLD", "LANDMARKS", "ACTIVITIES"], "x": -3470.0, "y": -2776.0, "z": 48.47, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Bi Canh Vuon Hoa Mua He", "name_en": "[Mondstadt M2] Midsummer Courtyard Domain", "name_vi": "⛩️ [Mondstadt M2] Bí Cảnh Vườn Hoa Mùa Hè (Midsummer Courtyard Domain)", "cats": ["WIBU_WORLD", "ACTIVITIES", "LANDMARKS"], "x": -3374.0, "y": -2904.0, "z": 48.33, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Cang Bo Bien Chim Ung & Hai Dang", "name_en": "[Mondstadt M2] Falcon Coast Harbor & Lighthouse", "name_vi": "🗼 [Mondstadt M2] Cảng Bờ Biển Chim Ưng (Falcon Coast) & Hải Đăng Lớn", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -3326.0, "y": -3208.0, "z": 20.31, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Phao Dai Hilichurl Bo Bien", "name_en": "[Mondstadt M2] Falcon Coast Hilichurl Stronghold", "name_vi": "⚔️ [Mondstadt M2] Pháo Đài Hilichurl Bờ Biển Chim Ưng & Nhà Thủ Lĩnh", "cats": ["WIBU_WORLD", "ACTIVITIES"], "x": -3326.0, "y": -3424.0, "z": 21.87, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Ho Kiem Dadaupa (Sword Grave)", "name_en": "[Mondstadt M2] Dadaupa Gorge Sword Cemetery", "name_vi": "🗡️ [Mondstadt M2] Hồ Kiếm Dadaupa (Sword Cemetery) & Đài Phong Ấn 3 Lớp", "cats": ["WIBU_WORLD", "LANDMARKS", "ACTIVITIES"], "x": -3574.0, "y": -3768.0, "z": 32.06, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Doanh Trai Bo Toc Nhat Thuc", "name_en": "[Mondstadt M2] Eclipse Tribe Grand Camp", "name_vi": "🔥 [Mondstadt M2] Đại Doanh Trại Bộ Tộc Nhật Thực (Eclipse Tribe)", "cats": ["WIBU_WORLD", "ACTIVITIES"], "x": -3462.0, "y": -3616.0, "z": 32.34, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Doanh Trai Bo Toc Hao Thit", "name_en": "[Mondstadt M2] Meaty Tribe Arena Camp", "name_vi": "🥊 [Mondstadt M2] Đại Doanh Trại Bộ Tộc Hảo Thịt (Meaty Tribe Arena)", "cats": ["WIBU_WORLD", "ACTIVITIES"], "x": -3390.0, "y": -3832.0, "z": 39.47, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Doanh Trai Bo Toc Hao Ngu", "name_en": "[Mondstadt M2] Sleeper Tribe Lake Camp", "name_vi": "⛺ [Mondstadt M2] Đại Doanh Trại Bộ Tộc Hảo Ngủ (Sleeper Tribe)", "cats": ["WIBU_WORLD", "ACTIVITIES"], "x": -3806.0, "y": -3864.0, "z": 43.08, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Bi Canh Hem Nui Quen (Domain)", "name_en": "[Mondstadt M2] Forsaken Rift Canyon Domain", "name_vi": "❄️ [Mondstadt M2] Bí Cảnh Hẻm Núi Quên (Forsaken Rift Domain)", "cats": ["WIBU_WORLD", "ACTIVITIES", "LANDMARKS"], "x": -3702.0, "y": -4040.0, "z": 42.96, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Dinh Mui Dat The (Cape Oath)", "name_en": "[Mondstadt M2] Cape Oath Ocean Headland", "name_vi": "🌊 [Mondstadt M2] Đỉnh Mũi Đất Thề (Cape Oath) & Cổng Lỗ Đen Đại Dương", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -3046.0, "y": -3800.0, "z": 38.33, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Dao Ran San Ho Musk & La Hoan", "name_en": "[Mondstadt M2] Musk Reef & Spiral Abyss Gate", "name_vi": "🌀 [Mondstadt M2] Đảo Rạn San Hô Musk & Cổng Xoáy La Hoàn Thâm Uyên", "cats": ["WIBU_WORLD", "LANDMARKS", "ACTIVITIES"], "x": -2550.0, "y": -3720.0, "z": 11.77, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Dau Cau Vinh Bac (North Bay)", "name_en": "[Mondstadt M2] North Bay Truss Bridgehead", "name_vi": "🌉 [Mondstadt M2] Đầu Cầu Vịnh Bắc (North Bay Truss Bridgehead)", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -3230.0, "y": -2784.0, "z": 41.92, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Dau Cau Trung Tam Falcon Coast", "name_en": "[Mondstadt M2] Falcon Coast Central Bridgehead", "name_vi": "🌉 [Mondstadt M2] Đầu Cầu Trung Tâm Bờ Biển Chim Ưng (Cầu Dây Văng)", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -3214.0, "y": -3280.0, "z": 12.2, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Dau Cau Eo Bien Nam Cape Oath", "name_en": "[Mondstadt M2] Cape Oath South Arch Bridgehead", "name_vi": "🌉 [Mondstadt M2] Đầu Cầu Eo Biển Nam Mũi Đất Thề (Cầu Vòm Cao Tốc)", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -2934.0, "y": -3872.0, "z": 34.07, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Dau Truong Boss Cay Cap Dong", "name_en": "[Mondstadt M2] Cryo Regisvine Boss Arena", "name_vi": "❄️ [Mondstadt M2] Hang Đấu Trường Boss Cây Cấp Đông (Cryo Regisvine)", "cats": ["WIBU_WORLD", "ACTIVITIES"], "x": -3542.0, "y": -2952.0, "z": 36.07, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Dau Truong Boss Loi Nguyen Ban", "name_en": "[Mondstadt M2] Electro Hypostasis Boss Arena", "name_vi": "⚡ [Mondstadt M2] Đấu Trường Boss Lôi Nguyên Bản (Electro Hypostasis)", "cats": ["WIBU_WORLD", "ACTIVITIES"], "x": -3174.0, "y": -3752.0, "z": 35.07, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Dau Truong Boss Phong Nguyen Ban", "name_en": "[Mondstadt M2] Anemo Hypostasis Boss Arena", "name_vi": "🌪️ [Mondstadt M2] Đấu Trường Boss Phong Nguyên Bản (Anemo Hypostasis)", "cats": ["WIBU_WORLD", "ACTIVITIES"], "x": -3510.0, "y": -2424.0, "z": 42.07, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Tram Giua Cau Go Dao La Hoan", "name_en": "[Mondstadt M2] Mid-Ocean Timber Bridge Pavilion", "name_vi": "🌊 [Mondstadt M2] Trạm Ngắm Cảnh Giữa Cầu Gỗ Vượt Biển Đi Đảo La Hoàn", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -2790.0, "y": -3760.0, "z": 25.22, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M1] 7-Eleven Konbini & Nha Hang Sakura", "name_en": "[Mondstadt M1] 7-Eleven Konbini & Sakura Dining", "name_vi": "🏪 [Mondstadt M1] Siêu Thị 7-Eleven Konbini, Phố Ẩm Thực & Nhà Hàng Sakura", "cats": ["WIBU_WORLD", "FOOD_CLUB", "SHOPS_STYLE"], "x": -3978.0, "y": -3108.0, "z": 5.08, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] San Khau Hologram Rung Thi Tham", "name_en": "[Mondstadt M1] Whispering Woods Hologram Stage", "name_vi": "🎤 [Mondstadt M1] Sân Khấu Ca Nhạc Hologram Rừng Thì Thầm (Whispering Woods)", "cats": ["WIBU_WORLD", "ACTIVITIES", "FOOD_CLUB"], "x": -3830.0, "y": -2872.0, "z": 14.1, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Showroom Sieu Xe & Ramen Ichiraku", "name_en": "[Mondstadt M1] Glass Car Showroom & Ichiraku Ramen", "name_vi": "🏎️ [Mondstadt M1] Showroom Siêu Xe Lồng Kính Ven Hồ & Quán Mì Ichiraku Ramen", "cats": ["WIBU_WORLD", "GUN_GARAGE", "FOOD_CLUB"], "x": -3974.0, "y": -3222.0, "z": 13.18, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Thi Tran Thanh Tuyen (Springvale)", "name_en": "[Mondstadt M1] Springvale Windmill Town Square", "name_vi": "🌾 [Mondstadt M1] Quảng Trường Cối Xay Gió Thị Trấn Thanh Tuyền (Springvale)", "cats": ["WIBU_WORLD", "LANDMARKS", "FOOD_CLUB"], "x": -4170.0, "y": -3462.0, "z": 18.1, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Dao Quy Lao Kame House (Ho Cider)", "name_en": "[Mondstadt M1] Master Roshi's Kame House Island", "name_vi": "🐢 [Mondstadt M1] Đảo Quy Lão Kame House Nam Hồ Cider & Bến Tàu", "cats": ["WIBU_WORLD", "LANDMARKS", "SAFEHOUSE_INT"], "x": -4600.0, "y": -3292.0, "z": 8.58, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Tru So Vom Cong Nghe Capsule Corp", "name_en": "[Mondstadt M1] Capsule Corp V2 Sci-Fi Dome HQ", "name_vi": "🛸 [Mondstadt M1] Trụ Sở Vòm Công Nghệ Tương Lai Capsule Corp V2", "cats": ["WIBU_WORLD", "LANDMARKS", "SAFEHOUSE_INT"], "x": -4714.0, "y": -3432.0, "z": 24.0, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Biet Thu Deo Cua Tay Ao (Touge)", "name_en": "[Mondstadt M1] East Touge Hairpin Modern Villa", "name_vi": "🏡 [Mondstadt M1] Biệt Thự Hiện Đại & Đài Ngắm Drift Đèo Đông (Touge Hairpin)", "cats": ["WIBU_WORLD", "SAFEHOUSE_INT", "LANDMARKS"], "x": -3740.0, "y": -3232.0, "z": 52.1, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Thap Ngam Canh Dinh Dong (SkyDeck)", "name_en": "[Mondstadt M1] East Peak Observation Tower", "name_vi": "🗼 [Mondstadt M1] Tháp Quan Sát Đỉnh Đông & Đài Ngắm Cảnh Trên Mây", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -3690.0, "y": -3052.0, "z": 72.1, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Thanh Dai Co Dinh Nam (Castillo)", "name_en": "[Mondstadt M1] South Peak Medieval Citadel", "name_vi": "🏰 [Mondstadt M1] Thành Đài Trung Cổ Đỉnh Nam (El Castillo Del Diablo)", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -4190.0, "y": -3652.0, "z": 88.1, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Lau Dai Doi Tay & Rung Anh Dao", "name_en": "[Mondstadt M1] West Peak Castle & Sakura Grove", "name_vi": "🏯 [Mondstadt M1] Lâu Đài Đồi Tây & Rừng Hoa Anh Đào Cổ Thụ", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -4910.0, "y": -2832.0, "z": 84.1, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Rong Phong Ma Dvalin (Stormterror)", "name_en": "[Mondstadt M1] Stormterror Dvalin Sky Dragon", "name_vi": "🐉 [Mondstadt M1] Rồng Phong Ma Dvalin 6 Cánh Lượn Trên Bầu Trời Hồ Cider", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -4270.0, "y": -3180.0, "z": 15.5, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Den Ngan Gio Tay (Amphitheater)", "name_en": "[Mondstadt M1] Thousand Winds Temple Amphitheater", "name_vi": "🏛️ [Mondstadt M1] Đấu Trường Cổ Đền Ngàn Gió (Thousand Winds Temple)", "cats": ["WIBU_WORLD", "LANDMARKS", "ACTIVITIES"], "x": -3705.0, "y": -2777.0, "z": 35.2, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Phong Khoi Dia & Dai Thu Vennessa", "name_en": "[Mondstadt M1] Windrise Great Oak Tree & Statue", "name_vi": "🌳 [Mondstadt M1] Phong Khởi Địa (Windrise): Đại Thụ Vennessa & Tượng Thần", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -3810.0, "y": -3332.0, "z": 39.76, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Ho Sao Roi (Starfell Lake Statue)", "name_en": "[Mondstadt M1] Starfell Lake & First Archon Statue", "name_vi": "✨ [Mondstadt M1] Hồ Sao Rơi (Starfell Lake): Tượng Phong Thần Khởi Nguyên", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -3865.0, "y": -2557.0, "z": 49.21, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Thung Lung Tuu Trang Dawn Winery", "name_en": "[Mondstadt M1] Dawn Winery Manor & Vineyards", "name_vi": "🍇 [Mondstadt M1] Thung Lũng Tửu Trang Dawn Winery & Đồi Nho Bạt Ngàn", "cats": ["WIBU_WORLD", "LANDMARKS", "FOOD_CLUB"], "x": -4820.0, "y": -3567.0, "z": 24.83, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Lanh Dia Bac Phong Lang (Wolvendom)", "name_en": "[Mondstadt M1] Wolvendom Forest & Andrius Path", "name_vi": "🐺 [Mondstadt M1] Lãnh Địa Bắc Phong Lang (Wolvendom) & Đường Vào Đấu Trường Sói", "cats": ["WIBU_WORLD", "ACTIVITIES", "LANDMARKS"], "x": -4895.0, "y": -3187.0, "z": 27.74, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Hem Nui Minh Quan (Brightcrown)", "name_en": "[Mondstadt M1] Brightcrown Canyon & Viaduct", "name_vi": "🏞️ [Mondstadt M1] Hẻm Núi Minh Quán (Brightcrown Canyon) & Cầu Vòm Cổ", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -4790.0, "y": -2552.0, "z": 46.16, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Dinh Vong Phong Bac (Stormbearer)", "name_en": "[Mondstadt M1] Stormbearer Mountains Summit", "name_vi": "⛰️ [Mondstadt M1] Đỉnh Vọng Phong Bắc (Stormbearer Peak) & Cối Xay Gió", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -4090.0, "y": -2392.0, "z": 96.1, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Ben Suoi Thanh Tuyen (Springvale)", "name_en": "[Mondstadt M1] Springvale Wooden Bridge & Stream", "name_vi": "🏞️ [Mondstadt M1] Bến Suối Thanh Tuyền & Cầu Gỗ Ven Hồ (Springvale Stream)", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -4060.0, "y": -3362.0, "z": 15.72, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Ban Dao Tay Ho Cider & Hai Dang", "name_en": "[Mondstadt M1] West Cider Lake Peninsula & Pier", "name_vi": "⚓ [Mondstadt M1] Bán Đảo Bờ Tây Hồ Cider & Ngọn Hải Đăng Ven Hồ", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -4690.0, "y": -3062.0, "z": 10.8, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Ben Cang Bac Ho Cider (North Pier)", "name_en": "[Mondstadt M1] North Cider Lake Harbor & Bridge", "name_vi": "⛵ [Mondstadt M1] Bến Cảng Bờ Bắc Hồ Cider & Cầu Giàn Thép", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -4430.0, "y": -2652.0, "z": 14.95, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Doi Da Rung Nam & Trai Hilichurl", "name_en": "[Mondstadt M1] South Woods Hilichurl Outpost", "name_vi": "🏹 [Mondstadt M1] Đồi Đá Rừng Nam & Doanh Trại Hilichurl (South Woods)", "cats": ["WIBU_WORLD", "ACTIVITIES"], "x": -4440.0, "y": -3552.0, "z": 27.71, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Thung Lung Rung Dong & Ham Mo Co", "name_en": "[Mondstadt M1] East Forest Valley & Ancient Mine", "name_vi": "⛏️ [Mondstadt M1] Thung Lũng Rừng Đông & Hầm Mỏ Cổ (East Forest Valley)", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -3870.0, "y": -3092.0, "z": 37.44, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt M1] Cao Nguyen Tay Bac & Dinh Thu Kinh", "name_en": "[Mondstadt M1] NW Highland Glass Pavilion", "name_vi": "🏛️ [Mondstadt M1] Cao Nguyên Đá Tây Bắc & Dinh Thự Kính Ngắm Hồ Cider", "cats": ["WIBU_WORLD", "SAFEHOUSE_INT", "LANDMARKS"], "x": -4870.0, "y": -3032.0, "z": 52.92, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt INT-01] Noi That Tuu Trang Dawn Winery", "name_en": "[Mondstadt INT-01] Dawn Winery Manor Interior", "name_vi": "🍷 [Nội Thất Mondstadt INT-01] Sảnh Chính Tửu Trang Dawn Winery (Bước Vào Được)", "cats": ["WIBU_WORLD", "FOOD_CLUB", "SAFEHOUSE_INT"], "x": -4820.0, "y": -3570.5, "z": 24.8, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt INT-02] Quan Ruou Angel's Share (M0)", "name_en": "[Mondstadt INT-02] Angel's Share Tavern Interior", "name_vi": "🍺 [Nội Thất Mondstadt INT-02] Quán Rượu Angel's Share (Bước Vào Được)", "cats": ["WIBU_WORLD", "FOOD_CLUB", "SAFEHOUSE_INT"], "x": -4174.5, "y": -3048.0, "z": 7.0, "region": "Mondstadt M0"},
+    {"name_ascii": "[Mondstadt INT-03] Noi That Dai Giao Duong (M0)", "name_en": "[Mondstadt INT-03] Favonius Cathedral Interior", "name_vi": "⛪ [Nội Thất Mondstadt INT-03] Thánh Đường Tây Phong Favonius (Bước Vào Được)", "cats": ["WIBU_WORLD", "SAFEHOUSE_INT", "LANDMARKS"], "x": -4444.0, "y": -2933.5, "z": 57.2, "region": "Mondstadt M0"},
+    {"name_ascii": "[Mondstadt INT-04] Noi That Tru So Ky Si (M0)", "name_en": "[Mondstadt INT-04] Knights of Favonius HQ Interior", "name_vi": "🛡️ [Nội Thất Mondstadt INT-04] Văn Phòng Jean & Thư Viện Lisa — Trụ Sở Kỵ Sĩ", "cats": ["WIBU_WORLD", "SAFEHOUSE_INT", "LANDMARKS"], "x": -4370.5, "y": -3018.0, "z": 33.8, "region": "Mondstadt M0"},
+    {"name_ascii": "[Mondstadt INT-05] Quan Ruou Duoi Meo Cat's Tail", "name_en": "[Mondstadt INT-05] Cat's Tail Tavern Interior", "name_vi": "🐾 [Nội Thất Mondstadt INT-05] Quán Rượu Đuôi Mèo Cat's Tail & Đấu Bài TCG", "cats": ["WIBU_WORLD", "FOOD_CLUB", "SAFEHOUSE_INT"], "x": -4148.5, "y": -3064.0, "z": 7.1, "region": "Mondstadt M0"},
+    {"name_ascii": "[Mondstadt INT-06] Phong Gia Kim Albedo (M1)", "name_en": "[Mondstadt INT-06] Albedo's Alchemy Lab Interior", "name_vi": "⚗️ [Nội Thất Mondstadt INT-06] Phòng Thí Nghiệm Giả Kim Của Albedo (Đỉnh Nam)", "cats": ["WIBU_WORLD", "SHOPS_STYLE", "SAFEHOUSE_INT"], "x": -4239.5, "y": -3019.0, "z": 13.0, "region": "Mondstadt M1"},
+    {"name_ascii": "[Mondstadt INT-07] La Hoan Tham Uyen Tang 12 (M2)", "name_en": "[Mondstadt INT-07] Spiral Abyss Floor 12 Chamber", "name_vi": "🌀 [Nội Thất Mondstadt INT-07] Cổng Bước Vào La Hoàn Thâm Uyên Tầng 12 (Musk Reef)", "cats": ["WIBU_WORLD", "ACTIVITIES", "SAFEHOUSE_INT"], "x": -2540.5, "y": -3712.0, "z": 10.2, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Dau Dong Dai Cau (Bo Whetstone)", "name_en": "[Mondstadt M2] East Viaduct Touchdown (Whetstone)", "name_vi": "🌉 [Mondstadt M2] Đầu Đông Đại Cầu Vượt Biển Nối Đất Liền Whetstone (San Andreas)", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -2584.0, "y": -2633.0, "z": 9.5, "region": "Whetstone <-> Mondstadt"},
+    {"name_ascii": "[Mondstadt M2] Giua Dai Cau Vuot Bien Mondstadt", "name_en": "[Mondstadt M2] Mid-Ocean Grand Viaduct Overlook", "name_vi": "🌉 [Mondstadt M2] Giữa Đại Cầu Vượt Biển Trung Tâm (Ngắm Toàn Cảnh Đại Dương)", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -2926.1, "y": -2984.4, "z": 16.6, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Cong Lo Den Mui Dat The -> La Hoan", "name_en": "[Mondstadt M2] Cape Oath Wormhole Portal (To Abyss)", "name_vi": "🌌 [Mondstadt M2] Cổng Dịch Chuyển Lỗ Đen Mũi Đất Thề (Bay Tới Đảo La Hoàn)", "cats": ["WIBU_WORLD", "ACTIVITIES", "LANDMARKS"], "x": -3029.5, "y": -3792.0, "z": 38.0, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M2] Cong Lo Den Dao La Hoan -> Dat Lien", "name_en": "[Mondstadt M2] Musk Reef Return Portal (To Cape Oath)", "name_vi": "🌌 [Mondstadt M2] Cổng Dịch Chuyển Lỗ Đen Đảo La Hoàn (Trở Về Mũi Đất Thề)", "cats": ["WIBU_WORLD", "ACTIVITIES", "LANDMARKS"], "x": -2553.0, "y": -3712.0, "z": 10.2, "region": "Mondstadt M2"},
+    {"name_ascii": "[Mondstadt M0] Ben Cang Bac Thanh Mondstadt", "name_en": "[Mondstadt M0] Mondstadt City North Harbor Dock", "name_vi": "⛵ [Mondstadt M0] Bến Cảng Bắc Thành Mondstadt & Cầu Tàu Hồ Cider", "cats": ["WIBU_WORLD", "LANDMARKS"], "x": -4350.0, "y": -2888.0, "z": 5.5, "region": "Mondstadt M0"},
+    {"name_ascii": "[Mondstadt M1] Tam Dau Truong Soi Bac Phong Andrius", "name_en": "[Mondstadt M1] Andrius Wolf of the North Boss Ring", "name_vi": "🐺 [Mondstadt M1] Tâm Đấu Trường Boss Sói Bắc Phong Andrius (Lãnh Địa Bắc Phong)", "cats": ["WIBU_WORLD", "ACTIVITIES", "LANDMARKS"], "x": -4895.0, "y": -3175.0, "z": 27.6, "region": "Mondstadt M1"},
+]
+
+for _idx, _mp in enumerate(MONDSTADT_CAMPAIGN_POIS, 1):
+    _pid = f"mondstadt_poi_{_idx:02d}"
+    _cats = list(_mp.get("cats", ["WIBU_WORLD", "LANDMARKS"]))
+    _primary_cat = _cats[0] if _cats else "WIBU_WORLD"
+    _desc_vi = f"Khu vực Đại lục Teyvat — {_mp['name_vi']} tại ({_mp['x']}, {_mp['y']}, {_mp['z']})."
+    _desc_en = f"Teyvat Continent Expansion — {_mp['name_en']} at ({_mp['x']}, {_mp['y']}, {_mp['z']})."
+    CURATED_GG_MAP_POIS.append({
+        "id": _pid,
+        "cat": _primary_cat,
+        "cats": _cats,
+        "name": _mp["name_ascii"],
+        "name_vi": _mp["name_vi"],
+        "region": _mp.get("region", "Mondstadt (Genshin)"),
+        "x": float(_mp["x"]),
+        "y": float(_mp["y"]),
+        "z": float(_mp["z"]),
+        "desc": _desc_vi,
+    })
+    _POI_EN_BY_ID[_pid] = (_mp["name_en"], f"🍃 {_mp['name_en']}", _desc_en)
+
+
+# --- Auto-Registered INLAND-03A North Chicago Sakura District POIs (2026-11-01) ---
+INLAND03A_SAKURA_POIS = [
+    {
+        "id": "inland03a_poi_01",
+        "name_ascii": "[Sakura Chicago A1] Hoc Vien Cap 3 Escuela & Dai Lo Hoa Anh Dao",
+        "name_vi": "[Sakura Chicago A1] Học Viện Cấp 3 Escuela & Đại Lộ Hoa Anh Đào",
+        "name_en": "[Sakura Chicago A1] Escuela High School & Sakura Blvd",
+        "x": 5965.0,
+        "y": 10215.0,
+        "z": 14.65,
+        "cats": [
+            "WIBU_WORLD",
+            "LANDMARKS"
+        ]
+    },
+    {
+        "id": "inland03a_poi_02",
+        "name_ascii": "[Sakura Chicago A2] Khu Lop Hoc & Phong Hieu Truong Anime",
+        "name_vi": "[Sakura Chicago A2] Khu Lớp Học & Phòng Hiệu Trưởng Anime",
+        "name_en": "[Sakura Chicago A2] Anime Classroom & Principal Office",
+        "x": 5765.0,
+        "y": 10345.0,
+        "z": 14.65,
+        "cats": [
+            "WIBU_WORLD",
+            "LANDMARKS"
+        ]
+    },
+    {
+        "id": "inland03a_poi_03",
+        "name_ascii": "[Sakura Chicago A3] San Bong Da Hoc Duong & CLB Nagato",
+        "name_vi": "[Sakura Chicago A3] Sân Bóng Đá Học Đường & CLB Nagato",
+        "name_en": "[Sakura Chicago A3] High School Soccer Pitch & Anime Club",
+        "x": 5935.0,
+        "y": 10540.0,
+        "z": 14.65,
+        "cats": [
+            "WIBU_WORLD",
+            "ENTERTAINMENT"
+        ]
+    },
+    {
+        "id": "inland03a_poi_04",
+        "name_ascii": "[Sakura Chicago A4] San Truot Bang Nghe Thuat Mua Dong",
+        "name_vi": "[Sakura Chicago A4] Sân Trượt Băng Nghệ Thuật Mùa Đông",
+        "name_en": "[Sakura Chicago A4] Winter Figure Skating Rink & Park",
+        "x": 5785.0,
+        "y": 10615.0,
+        "z": 14.65,
+        "cats": [
+            "WIBU_WORLD",
+            "ENTERTAINMENT"
+        ]
+    },
+    {
+        "id": "inland03a_poi_05",
+        "name_ascii": "[Sakura Chicago B1] Khu Pho Nha Nobita & Doraemon",
+        "name_vi": "[Sakura Chicago B1] Khu Phố Nhà Nobita & Doraemon",
+        "name_en": "[Sakura Chicago B1] Nobita & Doraemon Neighborhood",
+        "x": 6240.0,
+        "y": 10465.0,
+        "z": 14.65,
+        "cats": [
+            "WIBU_WORLD",
+            "LANDMARKS"
+        ]
+    },
+    {
+        "id": "inland03a_poi_06",
+        "name_ascii": "[Sakura Chicago B2] San Bai Ong Cong Doraemon & Cong Vien",
+        "name_vi": "[Sakura Chicago B2] Sân Bãi Ống Cống Doraemon & Công Viên",
+        "name_en": "[Sakura Chicago B2] Doraemon Pipe Lot & Neighborhood Park",
+        "x": 6215.0,
+        "y": 10215.0,
+        "z": 14.65,
+        "cats": [
+            "WIBU_WORLD",
+            "LANDMARKS"
+        ]
+    },
+    {
+        "id": "inland03a_poi_07",
+        "name_ascii": "[Sakura Chicago B3] Quan Mi Ichiraku Ramen & Pho Xe Day Dem",
+        "name_vi": "[Sakura Chicago B3] Quán Mì Ichiraku Ramen & Phố Xe Đẩy Đêm",
+        "name_en": "[Sakura Chicago B3] Ichiraku Ramen & Night Noodle Street",
+        "x": 6295.0,
+        "y": 10565.0,
+        "z": 14.65,
+        "cats": [
+            "WIBU_WORLD",
+            "FOOD_DRINK"
+        ]
+    },
+    {
+        "id": "inland03a_poi_08",
+        "name_ascii": "[Sakura Chicago C1] Pho Dien Tu Little Akihabara & OtakuShoppu",
+        "name_vi": "[Sakura Chicago C1] Phố Điện Tử Little Akihabara & OtakuShoppu",
+        "name_en": "[Sakura Chicago C1] Little Akihabara & OtakuShoppu District",
+        "x": 6335.0,
+        "y": 10345.0,
+        "z": 14.65,
+        "cats": [
+            "WIBU_WORLD",
+            "SHOPPING"
+        ]
+    },
+    {
+        "id": "inland03a_poi_09",
+        "name_ascii": "[Sakura Chicago C2] Toa Nha Kawaiiboutique & Pho Anime Dong",
+        "name_vi": "[Sakura Chicago C2] Tòa Nhà Kawaiiboutique & Phố Anime Đông",
+        "name_en": "[Sakura Chicago C2] Kawaiiboutique & East Anime Avenue",
+        "x": 6525.0,
+        "y": 10350.0,
+        "z": 14.65,
+        "cats": [
+            "WIBU_WORLD",
+            "SHOPPING"
+        ]
+    },
+    {
+        "id": "inland03a_poi_10",
+        "name_ascii": "[Sakura Chicago C3] Quang Truong 3 San Khau Concert Hatsune Miku",
+        "name_vi": "[Sakura Chicago C3] Quảng Trường 3 Sân Khấu Concert Hatsune Miku",
+        "name_en": "[Sakura Chicago C3] Hatsune Miku 3-Stage Concert Plaza (Puzzle / Romeo / WIM)",
+        "x": 6335.0,
+        "y": 10605.0,
+        "z": 14.65,
+        "cats": [
+            "WIBU_WORLD",
+            "ENTERTAINMENT"
+        ]
+    },
+    {
+        "id": "inland03a_poi_11",
+        "name_ascii": "[Sakura Chicago D1] Tong Hanh Dinh Avengers Facility HQ",
+        "name_vi": "[Sakura Chicago D1] Tổng Hành Dinh Avengers Facility HQ",
+        "name_en": "[Sakura Chicago D1] Avengers Facility HQ Campus",
+        "x": 5965.0,
+        "y": 10765.0,
+        "z": 14.65,
+        "cats": [
+            "LANDMARKS",
+            "WIBU_WORLD"
+        ]
+    },
+    {
+        "id": "inland03a_poi_12",
+        "name_ascii": "[Sakura Chicago D2] Starbucks Reserve & Thap Choc Troi Tallest Tower",
+        "name_vi": "[Sakura Chicago D2] Starbucks Reserve & Tháp Chọc Trời Tallest Tower",
+        "name_en": "[Sakura Chicago D2] Starbucks Reserve & The Tallest Tower",
+        "x": 6295.0,
+        "y": 10835.0,
+        "z": 14.65,
+        "cats": [
+            "FOOD_DRINK",
+            "LANDMARKS"
+        ]
+    },
+    {
+        "id": "inland03a_poi_13",
+        "name_ascii": "[Sakura Chicago D3] Dai Sieu Thi Walmart & Trung Tam Noi That IKEA",
+        "name_vi": "[Sakura Chicago D3] Đại Siêu Thị Walmart & Trung Tâm Nội Thất IKEA",
+        "name_en": "[Sakura Chicago D3] Walmart Supercenter & IKEA Megastore",
+        "x": 6335.0,
+        "y": 10895.0,
+        "z": 14.65,
+        "cats": [
+            "SHOPPING",
+            "LANDMARKS"
+        ]
+    },
+    {
+        "id": "inland03a_poi_14",
+        "name_ascii": "[Sakura Chicago D4] Showroom Sieu Xe & Biet Thu Hien Dai Modern Mansion",
+        "name_vi": "[Sakura Chicago D4] Showroom Siêu Xe & Biệt Thự Hiện Đại Modern Mansion",
+        "name_en": "[Sakura Chicago D4] Luxury Car Showroom & Modern Mansion",
+        "x": 6525.0,
+        "y": 10895.0,
+        "z": 14.65,
+        "cats": [
+            "SHOPPING",
+            "SAFEHOUSES"
+        ]
+    },
+    {
+        "id": "inland03a_poi_15",
+        "name_ascii": "[Sakura Chicago D5] Doi Biet Thu Ven Vinh Villa F & New Mansion",
+        "name_vi": "[Sakura Chicago D5] Đồi Biệt Thự Ven Vịnh Villa F & New Mansion",
+        "name_en": "[Sakura Chicago D5] Bayfront Villa F 1.1 & New Mansion Hills",
+        "x": 6835.0,
+        "y": 10750.0,
+        "z": 14.65,
+        "cats": [
+            "SAFEHOUSES",
+            "LANDMARKS"
+        ]
+    },
+    {
+        "id": "inland03a_poi_16",
+        "name_ascii": "[Sakura Chicago D7] Tram Dung Xe Tai & Xe Buyt Vanh Dai Bac",
+        "name_vi": "[Sakura Chicago D7] Trạm Dừng Xe Tải & Xe Buýt Vành Đai Bắc",
+        "name_en": "[Sakura Chicago D7] North Ring Truck & Bus Rest Park",
+        "x": 6250.0,
+        "y": 11095.0,
+        "z": 14.65,
+        "cats": [
+            "TRANSPORT",
+            "FOOD_DRINK"
+        ]
+    },
+    {
+        "id": "inland03a_poi_17",
+        "name_ascii": "[Sakura Chicago D8] Cong Vien Rung Thong, Khu Cam Trai & Hai Dang Ven Vinh",
+        "name_vi": "[Sakura Chicago D8] Công Viên Rừng Thông, Khu Cắm Trại & Hải Đăng Ven Vịnh",
+        "name_en": "[Sakura Chicago D8] Pine Forest, Camping Area & Bay Lighthouse",
+        "x": 6895.0,
+        "y": 11095.0,
+        "z": 14.65,
+        "cats": [
+            "LANDMARKS",
+            "ENTERTAINMENT"
+        ]
+    }
+]
+
+for _sp in INLAND03A_SAKURA_POIS:
+    _pid = _sp["id"]
+    _cats = list(_sp.get("cats", ["WIBU_WORLD", "LANDMARKS"]))
+    _primary_cat = _cats[0] if _cats else "WIBU_WORLD"
+    _desc_vi = f"Khu Đô Thị Học Viện & Đại Lộ Hoa Anh Đào Bắc Chicago (INLAND-03A) — {_sp['name_vi']} tại ({_sp['x']}, {_sp['y']}, {_sp['z']})."
+    _desc_en = f"North Chicago Sakura Academy District (INLAND-03A) — {_sp['name_en']} at ({_sp['x']}, {_sp['y']}, {_sp['z']})."
+    CURATED_GG_MAP_POIS.append({
+        "id": _pid,
+        "cat": _primary_cat,
+        "cats": _cats,
+        "name": _sp["name_ascii"],
+        "name_vi": _sp["name_vi"],
+        "region": "Sakura Chicago (INLAND-03A)",
+        "x": float(_sp["x"]),
+        "y": float(_sp["y"]),
+        "z": float(_sp["z"]),
+        "desc": _desc_vi,
+    })
+    _POI_EN_BY_ID[_pid] = (_sp["name_en"], f"🌸 {_sp['name_en']}", _desc_en)
+
+
+# ============================================================================
+# EAGLE WALL STREET STOCK EXCHANGE — 4 MULTI-CITY ENTRANCES (2026-11-05)
+# ============================================================================
+WALLSTREET_EXCHANGE_POIS = [
+    {
+        "id": "wallstreet_poi_ls",
+        "name_ascii": "[Wall Street LS] San Chung Khoan Pershing Square (Cong Chinh)",
+        "name_vi": "[Wall Street LS] Sàn Chứng Khoán Eagle Wall Street — Cổng Pershing Square",
+        "name_en": "[Wall Street LS] Eagle Wall Street Stock Exchange — Pershing Square Entrance",
+        "region": "Pershing Square LS",
+        "x": 1481.0,
+        "y": -1750.5,
+        "z": 13.55,
+        "cats": ["LANDMARKS", "ACTIVITIES", "SAFEHOUSE_INT"],
+    },
+    {
+        "id": "wallstreet_poi_sf",
+        "name_ascii": "[Wall Street SF] San Chung Khoan Financial District (Thap Tai Chinh)",
+        "name_vi": "[Wall Street SF] Sàn Chứng Khoán Eagle Wall Street — Tháp Tài Chính SF",
+        "name_en": "[Wall Street SF] Eagle Wall Street Stock Exchange — Financial District Tower",
+        "region": "Financial District SF",
+        "x": -1722.5,
+        "y": 789.8,
+        "z": 23.90,
+        "cats": ["LANDMARKS", "ACTIVITIES", "SAFEHOUSE_INT"],
+    },
+    {
+        "id": "wallstreet_poi_chi",
+        "name_ascii": "[Wall Street Chicago] San Chung Khoan LaSalle Downtown Chicago",
+        "name_vi": "[Wall Street Chicago] Sàn Chứng Khoán Eagle Wall Street — Đại Lộ LaSalle",
+        "name_en": "[Wall Street Chicago] Eagle Wall Street Stock Exchange — LaSalle Financial Arch",
+        "region": "Downtown Chicago",
+        "x": 6252.8,
+        "y": 9257.5,
+        "z": 7.80,
+        "cats": ["LANDMARKS", "ACTIVITIES", "SAFEHOUSE_INT"],
+    },
+    {
+        "id": "wallstreet_poi_lc",
+        "name_ascii": "[Wall Street LC] San Chung Khoan South Staunton Liberty City",
+        "name_vi": "[Wall Street LC] Sàn Chứng Khoán Eagle Wall Street — Tháp Staunton LC",
+        "name_en": "[Wall Street LC] Eagle Wall Street Stock Exchange — South Staunton Financial",
+        "region": "Staunton Island LC",
+        "x": 14580.9,
+        "y": 7762.5,
+        "z": 21.50,
+        "cats": ["LANDMARKS", "ACTIVITIES", "SAFEHOUSE_INT"],
+    },
+]
+
+for _wp in WALLSTREET_EXCHANGE_POIS:
+    _wpid = _wp["id"]
+    _wcats = list(_wp["cats"])
+    _wdesc_vi = (
+        f"{_wp['name_vi']} — Bước vào vòng sáng vàng nhấn [E] để vào Sàn Giao Dịch Chứng Khoán 3D trực tiếp "
+        f"(5 bảng điện tử thời gian thực đồng bộ 51 mã với EaglePhone, 8 nữ Broker AI gpt-5-nano & 10 nữ Trader)."
+    )
+    _wdesc_en = (
+        f"{_wp['name_en']} — Step into the golden beacon and press [E] to enter the live 3D Trading Floor "
+        f"(5 real-time LED boards synced 1:1 with EaglePhone, 8 female gpt-5-nano Brokers & 10 female Traders)."
+    )
+    CURATED_GG_MAP_POIS.append({
+        "id": _wpid,
+        "cat": _wcats[0],
+        "cats": _wcats,
+        "name": _wp["name_ascii"],
+        "name_vi": _wp["name_vi"],
+        "region": _wp["region"],
+        "x": float(_wp["x"]),
+        "y": float(_wp["y"]),
+        "z": float(_wp["z"]),
+        "desc": _wdesc_vi,
+    })
+    _POI_EN_BY_ID[_wpid] = (_wp["name_en"], f"🏛️ {_wp['name_en']}", _wdesc_en)
